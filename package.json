@@ -1,0 +1,67 @@
+{
+  "name": "plugin-keeperhub",
+  "version": "0.1.0",
+  "description": "Deterministic onchain execution for ElizaOS agents. The agent composes and dry runs; a human approves; KeeperHub executes the exact reviewed plan.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "elizaos",
+    "plugin",
+    "keeperhub",
+    "web3",
+    "agent"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.21.0",
+    "zod": "^4.4.3"
+  },
+  "peerDependencies": {
+    "@elizaos/core": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@elizaos/core": "^1.0.0",
+    "@types/node": "^22.20.3",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "agentConfig": {
+    "pluginType": "elizaos:plugin:1.0.0",
+    "pluginParameters": {
+      "KEEPERHUB_API_KEY": {
+        "type": "string",
+        "description": "KeeperHub organization API key (kh_...)",
+        "required": true,
+        "sensitive": true
+      },
+      "KEEPERHUB_MCP_URL": {
+        "type": "string",
+        "description": "KeeperHub MCP endpoint",
+        "required": false,
+        "default": "https://app.keeperhub.com/mcp"
+      },
+      "KEEPERHUB_DEFAULT_CHAIN_ID": {
+        "type": "string",
+        "description": "Chain ID used when the agent does not name one",
+        "required": false,
+        "default": "11155111"
+      }
+    }
+  }
+}
