@@ -61,18 +61,21 @@ const functionArgsSchema = z
     }
   }, { message: "function_args must be a JSON array" });
 
+const solidityIdentifier = z
+  .string()
+  .trim()
+  .regex(/^[A-Za-z_$][\w$]*$/, "function_name must be a Solidity identifier");
+
+const numericString = z
+  .string()
+  .trim()
+  .regex(/^\d+$/, "chain_id must be a numeric string");
+
 export const contractCallIntentSchema = z.object({
   contract_address: addressSchema,
-  function_name: z
-    .string()
-    .trim()
-    .regex(/^[A-Za-z_$][\w$]*$/, "function_name must be a Solidity identifier"),
+  function_name: solidityIdentifier,
   function_args: functionArgsSchema.optional(),
-  chain_id: z
-    .string()
-    .trim()
-    .regex(/^\d+$/, "chain_id must be a numeric string")
-    .optional(),
+  chain_id: numericString.optional(),
   value: amountSchema.optional(),
 });
 
@@ -168,4 +171,58 @@ function stripFence(text: string): string {
   const withoutOpen = text.replace(/^```(?:json)?\s*/i, "");
   const close = withoutOpen.lastIndexOf("```");
   return (close === -1 ? withoutOpen : withoutOpen.slice(0, close)).trim();
+}
+
+/**
+ * Conditional execution: read one scalar from a contract, and call a function
+ * only if the comparison holds. KeeperHub encodes `function_args` as a JSON
+ * string on both halves, so both are normalised the same way.
+ */
+export const CONDITION_OPERATORS = ["eq", "neq", "gt", "lt", "gte", "lte"] as const;
+
+export const checkAndExecuteIntentSchema = z.object({
+  contract_address: addressSchema,
+  function_name: solidityIdentifier,
+  function_args: functionArgsSchema.optional(),
+  chain_id: numericString.optional(),
+  condition: z.object({
+    operator: z.enum(CONDITION_OPERATORS),
+    /** BigInt-compatible decimal or hexadecimal, per KeeperHub's contract. */
+    value: z
+      .string()
+      .trim()
+      .refine((v) => /^-?\d+$/.test(v) || /^0x[0-9a-fA-F]+$/.test(v), {
+        message: "condition value must be a decimal or 0x-prefixed hex integer",
+      }),
+  }),
+  action: z.object({
+    contract_address: addressSchema,
+    function_name: solidityIdentifier,
+    function_args: functionArgsSchema.optional(),
+  }),
+});
+
+export type CheckAndExecuteIntent = z.infer<typeof checkAndExecuteIntentSchema>;
+
+export const CHECK_AND_EXECUTE_PROMPT = `Extract a conditional contract call from the user message.
+
+The user wants to read a value from a contract and act only if a comparison holds.
+
+Respond with ONLY a JSON object, no prose and no code fence, with these keys:
+  contract_address (string, required) the contract to READ the check value from
+  function_name    (string, required) the read function; it returns one integer, address or bytes value
+  function_args    (array, optional)  arguments for the read, each as a string
+  chain_id         (string, optional) numeric chain id if the user named a chain
+  condition        (object, required) { "operator": one of eq/neq/gt/lt/gte/lte, "value": decimal or 0x hex string }
+  action           (object, required) { "contract_address": string, "function_name": string, "function_args": optional array }
+
+Copy addresses, names and values character for character. Never invent, round,
+complete or correct them. If the message does not contain a read, a comparison
+and an action to take, respond with exactly: null`;
+
+/** Parse a model response into a validated conditional-execution intent. */
+export function parseCheckAndExecuteIntent(
+  raw: unknown
+): ExtractResult<CheckAndExecuteIntent> {
+  return parseIntent(raw, checkAndExecuteIntentSchema);
 }

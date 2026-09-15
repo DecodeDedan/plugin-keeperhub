@@ -16,6 +16,15 @@ export type PendingPlan = {
   args: Record<string, unknown>;
   /** Rendered summary the human actually reviewed. */
   summary: string;
+  /**
+   * Stable name for this piece of work, minted once when the plan is queued.
+   *
+   * The idempotency key is derived from it, so every broadcast of this one
+   * plan sends the same key and a retry replays rather than re-executing. A
+   * fresh dry run mints a new one, so two deliberate identical transfers stay
+   * distinct inside the 24-hour replay window.
+   */
+  taskId: string;
   createdAt: number;
 };
 
@@ -88,4 +97,34 @@ export function broadcastArgs(
 ): Record<string, unknown> {
   const { simulate: _simulate, ...rest } = plan.args;
   return { ...rest, idempotency_key: idempotencyKey };
+}
+
+/** Mint a task id for a new plan. Callers should not reuse one across plans. */
+export function newTaskId(): string {
+  return crypto.randomUUID();
+}
+
+/**
+ * The last execution started in a room.
+ *
+ * A broadcast that comes back `unconfirmed` or `running` is not finished, and
+ * the correct response to that is to poll, never to re-send. Remembering the
+ * execution id is what lets the agent answer "did it land" without the human
+ * copying an identifier out of a chat message.
+ */
+export type ExecutionTracker = {
+  put(roomId: string, executionId: string): void;
+  get(roomId: string): string | undefined;
+};
+
+export function createExecutionTracker(): ExecutionTracker {
+  const executions = new Map<string, string>();
+  return {
+    put(roomId, executionId) {
+      executions.set(roomId, executionId);
+    },
+    get(roomId) {
+      return executions.get(roomId);
+    },
+  };
 }
