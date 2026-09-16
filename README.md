@@ -1,4 +1,4 @@
-# plugin-keeperhub
+<img src="https://raw.githubusercontent.com/DecodeDedan/plugin-keeperhub/main/docs/brand/lockup.png" alt="plugin-keeperhub" width="420" />
 
 Deterministic onchain execution for ElizaOS agents.
 
