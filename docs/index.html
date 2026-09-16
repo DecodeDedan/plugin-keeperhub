@@ -19,7 +19,9 @@
   --rule-soft:#dee4d9;
   --muted:#5c6b62;
   --verified:#1a7f45;
+  --verified-ink:#15683a;
   --pending:#b0810f;
+  --pending-ink:#8a6409;
   --void:#a8291b;
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   --sans:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
@@ -75,9 +77,9 @@ h1{font-family:var(--mono);font-weight:500;
 body[data-stage="held"] .stages .s-composed,
 body[data-stage="executed"] .stages .s-composed,
 body[data-stage="discarded"] .stages .s-composed{color:var(--ink);border-color:var(--ink)}
-body[data-stage="held"] .stages .s-held{color:var(--pending);border-color:var(--pending);background:#fbf4e2}
+body[data-stage="held"] .stages .s-held{color:var(--pending-ink);border-color:var(--pending);background:#fbf4e2}
 body[data-stage="executed"] .stages .s-held{color:var(--ink);border-color:var(--ink)}
-body[data-stage="executed"] .stages .s-executed{color:var(--verified);border-color:var(--verified);background:#e9f4ec}
+body[data-stage="executed"] .stages .s-executed{color:var(--verified-ink);border-color:var(--verified);background:#e9f4ec}
 body[data-stage="discarded"] .stages .s-held{color:var(--void);border-color:var(--void);background:#fbeceb}
 
 /* ---- terminal ---- */
@@ -89,7 +91,7 @@ body[data-stage="discarded"] .stages .s-held{color:var(--void);border-color:var(
 .term pre{margin:0;font:inherit;white-space:pre}
 .prompt{color:var(--muted)}
 .ok{color:var(--verified)}
-.warn{color:var(--pending)}
+.warn{color:var(--pending-ink)}
 .no{color:var(--void)}
 .caret{display:inline-block;width:.55em;height:1.05em;background:var(--ink);
   vertical-align:-.17em;animation:blink 1.06s steps(1) infinite}
@@ -129,7 +131,7 @@ p{max-width:66ch;margin:0 0 1.05rem}
 .step h3{font-family:var(--mono);font-size:.95rem;font-weight:600;margin:0 0 .4rem;letter-spacing:-.01em}
 .step p{font-size:.93rem;color:var(--muted);margin:0;max-width:none}
 .step.gate{border-color:var(--pending);background:#fcf7ea}
-.step.gate h3{color:#8a6409}
+.step.gate h3{color:var(--pending-ink)}
 
 /* ---- action cards: the left rule carries what the action is allowed to do ---- */
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(226px,1fr));gap:1rem}
