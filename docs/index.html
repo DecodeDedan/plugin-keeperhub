@@ -161,6 +161,8 @@ p{max-width:66ch;margin:0 0 1.05rem}
   white-space:pre;overflow-x:auto}
 .receipt a{color:var(--verified)}
 .stamp{display:inline-block}
+.provenance{font-size:.85rem;color:var(--muted);margin:.1rem 0 0;max-width:62ch}
+.note{font-size:.88rem;color:var(--muted);margin:1rem 0 0}
 
 .install{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
   background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:1.05rem 1.35rem}
@@ -246,12 +248,12 @@ footer p{max-width:62ch}
         <span class="s-held">held for approval</span>
         <span class="s-executed">executed</span>
       </div>
-      <div class="term" id="term" data-rise aria-live="polite" aria-atomic="false"><pre id="out"><span class="prompt">you</span>
-send 0.05 ETH to 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238<span class="caret" id="caret"></span></pre></div>
+      <div class="term" id="term" data-rise aria-live="polite" aria-atomic="false"><pre id="out"><span class="muted">loading the recorded run...</span></pre></div>
       <div class="controls" id="controls" data-rise>
-        <button id="run">Ask the agent</button>
-        <span class="hint" id="hint">Real output from a live run. Nothing here touches a chain.</span>
+        <button id="run" disabled>Ask the agent</button>
+        <span class="hint" id="hint">Loading the recorded session.</span>
       </div>
+      <p class="provenance" id="provenance">Every line below is replayed from <a href="run.json">run.json</a>, captured from a real ElizaOS session.</p>
     </div>
   </div>
 
@@ -356,12 +358,13 @@ send 0.05 ETH to 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238<span class="caret" i
   <section class="wrap sec">
     <div class="rail"><h2>A real receipt</h2></div>
     <div class="body">
-      <p>Executed against production KeeperHub on Ethereum Sepolia. The hash resolves.</p>
-      <div class="receipt" id="receipt">execution    qwkk13npsccznblf3m6gr
-transaction  <a href="https://sepolia.etherscan.io/tx/0x5b537ffae10324d3b9e620c5b9647f51f24787b23b293d5097b75c5d3d5a048b">0x5b537ffae10324d3b9e620c5b9647f51f24787b23b293d5097b75c5d3d5a048b</a>
-block        11712998
-receipt      <span class="ok stamp" id="stamp">success, verified</span>
-gas used     74781</div>
+      <p>
+        The agent broadcast this through KeeperHub. The receipt below was not read back from
+        KeeperHub: it was fetched from a public Sepolia node, so the confirmation comes from a
+        party with no stake in the claim.
+      </p>
+      <div class="receipt" id="receipt"><span class="muted">loading the receipt...</span></div>
+      <p class="note" id="receipt-note"></p>
     </div>
   </section>
 
@@ -405,30 +408,71 @@ gas used     74781</div>
   var controls = document.getElementById("controls");
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  var PLAN =
-    '<span class="prompt">you</span>\n' +
-    'send 0.05 ETH to 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238\n\n' +
-    'Dry run complete. This is the exact plan that would execute:\n' +
-    '  move         0.001 (native token)\n' +
-    '  to           0x67f10576d6333FFA439EB1d4293BB6C9f019F138\n' +
-    '  chain        11155111\n' +
-    '  gas estimate 21227\n\n' +
-    '<span class="warn">Nothing has moved.</span> Approve to execute exactly this.';
+  var esc = function(t){ return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); };
+  var explorer = function(hash){ return "https://sepolia.etherscan.io/tx/" + hash; };
 
-  var DONE =
-    '<span class="prompt">you</span>\nconfirm\n\n' +
-    'Executed the plan you approved. The chain confirmed it.\n' +
-    '  execution    qwkk13npsccznblf3m6gr\n' +
-    '  transaction  0x5b537ffae10324d3b9e620c5b9647f51f24787b23b293d5097b75c5d3d5a048b\n' +
-    '  receipt      <span class="ok">success, verified</span>';
+  // The three scripts below are assembled from run.json, which scripts/capture-run.mjs
+  // writes from a recorded session plus a receipt read off a public node. Nothing on
+  // this page is typed by hand, because a page that types its own proof proves nothing.
+  var PLAN = "", DONE = "", DISCARDED = "", ready = false;
 
-  var DISCARDED =
-    '<span class="prompt">you</span>\n' +
-    'send 0.05 ETH to 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238\n\n' +
-    '<span class="no">Discarded.</span> The plan is gone and nothing was sent.\n' +
-    'Ask again and it will dry run from scratch.';
+  function build(d){
+    var a = d.agentRun, c = d.chainCheck;
+    PLAN =
+      '<span class="prompt">you</span>\n' + esc(a.request) + '\n\n' +
+      'Dry run complete. This is the exact plan that would execute:\n' +
+      '  move         ' + esc(a.move) + '\n' +
+      '  to           ' + esc(a.to) + '\n' +
+      '  chain        ' + esc(a.chain) + '\n' +
+      '  gas estimate ' + esc(a.gasEstimate) + '\n\n' +
+      '<span class="warn">Nothing has moved.</span> Approve to execute exactly this.';
+    DONE =
+      '<span class="prompt">you</span>\nconfirm\n\n' +
+      'Executed the plan you approved. The chain confirmed it.\n' +
+      '  execution    ' + esc(a.executionId) + '\n' +
+      '  transaction  ' + esc(a.txHash) + '\n' +
+      '  receipt      <span class="ok">' + esc(c.status) + ', block ' + esc(c.block) + '</span>';
+    DISCARDED =
+      '<span class="prompt">you</span>\n' + esc(a.request) + '\n\n' +
+      '<span class="no">Discarded.</span> The plan is gone and nothing was sent.\n' +
+      'Ask again and it will dry run from scratch.';
+
+    out.innerHTML = '<span class="prompt">you</span>\n' + esc(a.request) + '<span class="caret" id="caret"></span>';
+    run.disabled = false;
+    hint.textContent = "Replay of a real session. This page holds no API key and reaches no chain.";
+    document.getElementById("provenance").innerHTML =
+      'Recorded ' + esc(new Date(d.capturedAt).toISOString().slice(0, 10)) + ' from ' + esc(a.source) +
+      '. Replayed from <a href="run.json">run.json</a>; the receipt is checked against ' + esc(c.source) + '.';
+
+    document.getElementById("receipt").innerHTML =
+      'execution    ' + esc(a.executionId) + '\n' +
+      'transaction  <a href="' + explorer(a.txHash) + '">' + esc(a.txHash) + '</a>\n' +
+      'block        ' + esc(c.block) + '\n' +
+      'mined        ' + esc(c.minedAt.replace("T", " ").replace(".000Z", " UTC")) + '\n' +
+      'receipt      <span class="ok stamp" id="stamp">' + esc(c.status) + ', verified</span>\n' +
+      'gas used     ' + esc(c.gasUsed);
+    document.getElementById("receipt-note").textContent =
+      "KeeperHub broadcasts through its executor contract " + c.executor + ", so the 0.001 ETH moves " +
+      "inside that call and the gas used is higher than the " + a.gasEstimate + " the dry run estimated " +
+      "for the transfer itself. The recipient in the calldata is the address that was approved.";
+    ready = true;
+    stamp();
+  }
+
+  function failed(reason){
+    out.innerHTML = '<span class="no">Could not load the recorded run.</span>\n' + esc(reason) +
+      '\n\nThe transaction does not depend on this page. Check it on Etherscan.';
+    hint.textContent = "The replay is unavailable. The receipt below still links to the chain.";
+    document.getElementById("receipt").innerHTML =
+      '<span class="no">Could not load run.json.</span> ' + esc(reason);
+  }
 
   function stage(name){ document.body.dataset.stage = name; }
+
+  fetch("run.json", { cache: "no-store" })
+    .then(function(r){ if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(build)
+    .catch(function(e){ failed(e.message || String(e)); });
 
   // Reveal on a whole-line cadence: a character-by-character crawl would make
   // the one block a visitor actually needs to read the slowest thing here.
@@ -480,26 +524,29 @@ gas used     74781</div>
     navigator.clipboard.writeText(cmd).then(function(){ say("Copied"); }, function(){ say("Select it"); });
   });
 
+  // One stamp when the receipt scrolls into view, once the values it stamps exist.
+  function stamp(){
+    if (reduced || !ready || !("IntersectionObserver" in window)) return;
+    var el = document.getElementById("stamp");
+    if (!el) return;
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (!e.isIntersecting) return;
+        el.animate([{ opacity: 0, transform: "scale(1.06)" }, { opacity: 1, transform: "scale(1)" }],
+          { duration: 180, easing: "ease-out" });
+        io.disconnect();
+      });
+    }, { threshold: 0.6 });
+    io.observe(document.getElementById("receipt"));
+  }
+
   // One entrance sequence on load, and one stamp when the receipt is reached.
   var risers = document.querySelectorAll("[data-rise]");
   if (reduced) {
     risers.forEach(function(el){ el.classList.add("in"); });
   } else {
     risers.forEach(function(el, i){ setTimeout(function(){ el.classList.add("in"); }, 60 + i * 70); });
-    if ("IntersectionObserver" in window) {
-      var stamp = document.getElementById("stamp");
-      var io = new IntersectionObserver(function(entries){
-        entries.forEach(function(e){
-          if (!e.isIntersecting) return;
-          stamp.animate(
-            [{ opacity: 0, transform: "scale(1.06)" }, { opacity: 1, transform: "scale(1)" }],
-            { duration: 180, easing: "ease-out" }
-          );
-          io.disconnect();
-        });
-      }, { threshold: 0.6 });
-      io.observe(document.getElementById("receipt"));
-    }
+    stamp();
   }
 })();
 </script>

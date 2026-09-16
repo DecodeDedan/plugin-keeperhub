@@ -1,0 +1,44 @@
+{
+  "note": "Every value in this file was captured from a real run. The page renders it; nothing here is written by hand.",
+  "capturedAt": "2026-09-16T19:01:19.223Z",
+  "agentRun": {
+    "source": "ElizaOS agent with plugin-keeperhub, Ollama qwen2.5:14b, production KeeperHub",
+    "request": "Send 0.001 ETH to 0x67f10576d6333FFA439EB1d4293BB6C9f019F138 on chain 11155111",
+    "move": "0.001 (native token)",
+    "to": "0x67f10576d6333FFA439EB1d4293BB6C9f019F138",
+    "chain": "11155111",
+    "gasEstimate": "21227",
+    "from": "0x67f10576d6333ffa439eb1d4293bb6c9f019f138",
+    "gateLine": "Nothing has moved. Reply \"confirm\" to execute exactly this, or ignore it to discard.",
+    "executionId": "f8gc7p2hg1pv06mrxxp8h",
+    "txHash": "0x14c5929f9d39527345fbfb9e7852f85cfcd84313853a6cd68fcdd75a8fdf2bc6",
+    "explorer": "https://sepolia.etherscan.io/tx/0x14c5929f9d39527345fbfb9e7852f85cfcd84313853a6cd68fcdd75a8fdf2bc6"
+  },
+  "chainCheck": {
+    "source": "eth_getTransactionReceipt via ethereum-sepolia-rpc.publicnode.com",
+    "checkedAt": "2026-09-16T19:01:17.068Z",
+    "status": "success",
+    "block": 11718633,
+    "minedAt": "2026-09-16T18:58:36.000Z",
+    "gasUsed": 47705,
+    "executor": "0x5af5194b4b0909eb978e3cf1e25333852277f07d",
+    "submittedBy": "0xa17cb6adb58277e5b4a44b8c1ecb449bb6614e87"
+  },
+  "dryRunProbe": {
+    "ran": true,
+    "at": "2026-09-16T19:01:19.217Z",
+    "ms": 2004,
+    "passed": true,
+    "queued": true,
+    "taskId": "27fe82a5-3fc8-4759-96dd-9d40a193ba4c",
+    "derivedKey": "3bd84fee005066247352615c0ed5538ce6775251044138c1e0f4ffa34ef9c50c",
+    "storedArgs": {
+      "chain_id": "11155111",
+      "to_address": "0x67f10576d6333FFA439EB1d4293BB6C9f019F138",
+      "amount": "0.001",
+      "simulate": true
+    },
+    "gasEstimate": "21227",
+    "text": "Dry run complete. This is the exact plan that would execute:\n  move         0.001 (native token)\n  to           0x67f10576d6333FFA439EB1d4293BB6C9f019F138\n  chain        11155111\n  gas estimate 21227\n  from         0x67f10576d6333ffa439eb1d4293bb6c9f019f138\n\nNothing has moved. Reply \"confirm\" to execute exactly this, or ignore it to discard."
+  }
+}

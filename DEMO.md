@@ -194,6 +194,12 @@ gas used     74781
 
 https://sepolia.etherscan.io/tx/0x5b537ffae10324d3b9e620c5b9647f51f24787b23b293d5097b75c5d3d5a048b
 
+A later run of the same loop, driven end to end by a running ElizaOS agent rather than this
+script, is recorded in `docs/run.json` and broadcast transaction
+0x14c5929f9d39527345fbfb9e7852f85cfcd84313853a6cd68fcdd75a8fdf2bc6. That file is written by
+`scripts/capture-run.mjs`, which checks the receipt against a public Sepolia node rather than
+taking KeeperHub's word for it.
+
 The derived idempotency key printed at plan time was byte-identical to the one sent at
 broadcast, which is the property that makes a retry safe.
 
