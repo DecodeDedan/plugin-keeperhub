@@ -86,8 +86,8 @@ Matches the README mermaid diagrams so documentation and film read as one system
    in the verified green.
 5b. **The page** — 3.0s — the landing page in a browser frame, URL bar reading
    `decodededan.github.io/plugin-keeperhub`, cropped to the hero. Caption: "The same gate,
-   playable in your browser." The capture is taken from the live URL
-   (`assets/images/site.png`), never redrawn in the composition.
+   playable in your browser." The capture is taken from the live URL with the
+   page held at the gate (`assets/images/site.png`), never redrawn in the composition.
 6. **The mark** — 1.8s — plugin-keeperhub / The agent proposes. You approve. / ElizaOS x
    KeeperHub.
 

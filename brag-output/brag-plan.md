@@ -110,7 +110,8 @@ Scene durations sum to 22.8s.
 
 ## Re-cut note
 Scene 5b was added after the landing page shipped. The frame is a real capture of
-https://decodededan.github.io/plugin-keeperhub/ taken from the live URL, not a rebuilt mock:
+https://decodededan.github.io/plugin-keeperhub/ taken from the live URL with the page held at
+the gate -- the state a visitor reaches by clicking once -- not a rebuilt mock:
 a redrawn page drifts from what the link actually serves. The caption claims only what the
 page does -- it replays the same real dry-run output and stops at the same gate, and its own
 hint line says nothing there touches a chain.
