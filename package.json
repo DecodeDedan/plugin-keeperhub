@@ -82,10 +82,10 @@
   "author": "okwareddevnest",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/okwareddevnest/plugin-keeperhub.git"
+    "url": "git+https://github.com/DecodeDedan/plugin-keeperhub.git"
   },
-  "homepage": "https://okwareddevnest.github.io/plugin-keeperhub/",
+  "homepage": "https://decodededan.github.io/plugin-keeperhub/",
   "bugs": {
-    "url": "https://github.com/okwareddevnest/plugin-keeperhub/issues"
+    "url": "https://github.com/DecodeDedan/plugin-keeperhub/issues"
   }
 }
