@@ -1,111 +1,53 @@
-# Hyperframes Composition Brief: plugin-keeperhub
+# Hyperframes Composition Brief: plugin-keeperhub demo
 
 ## Objective
-A 22.8-second launch film for plugin-keeperhub, an ElizaOS plugin that makes an AI agent dry run
-every onchain transfer and wait for human approval before any value moves.
+A 90-second recorded demonstration of plugin-keeperhub: an ElizaOS agent asked in plain English
+to move money, stopped at a human approval gate, then broadcasting the reviewed plan and
+returning a receipt that resolves on a public explorer.
 
 ## Output
 - Composition directory: `brag-output/composition/`
 - Rendered video: `brag-output/brag.mp4`
-- Format: landscape, 1920x1080
-- Duration: 22.8 seconds
+- Format: landscape, 1920x1080, 90.0 seconds
 
-## Source Material
-- Project root: `/Users/okwared/Softwares/Hackathons/Dora/plugin-keeperhub`
-- Primary files read: `README.md`, `src/actions.ts`, `src/render.ts`, `DEMO.md`
-- Product name: plugin-keeperhub
-- Strongest claim: a simulate action has no code path that broadcasts; confirm has no code
-  path that constructs arguments
-- Key visual moment to recreate: the dry-run plan block exactly as the plugin prints it,
-  monospace, with its aligned label column
+## Source material
+All product footage is a recording. Nothing is recreated in the composition.
 
-### Copy that must appear verbatim
-Every line below is real output or real data from a live run against production KeeperHub.
-Do not paraphrase, re-align, or "improve" any of it.
+- `assets/video/a-ask.mp4` … `f-receipt.mp4` — one ElizaOS session at localhost:3000, recorded
+  frame by frame through Chrome DevTools screencast while the real UI was driven
+- `assets/video/g-site.mp4` — the published landing page, recorded the same way
+- `assets/images/etherscan.png` — the transaction page at 2x
+- `docs/run.json` — the values shown on the two record cards
 
-    send 0.05 ETH to 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238
+### Values that must stay exact
+    transaction  0x14c5929f9d39527345fbfb9e7852f85cfcd84313853a6cd68fcdd75a8fdf2bc6
+    block        11718633
+    gas used     47705
+    task id      27fe82a5-3fc8-4759-96dd-9d40a193ba4c
+    derived key  3bd84fee005066247352615c0ed5538ce6775251044138c1e0f4ffa34ef9c50c
+    gas estimate 21227
 
-    Dry run complete. This is the exact plan that would execute:
-      move         0.001 (native token)
-      to           0x67f10576d6333FFA439EB1d4293BB6C9f019F138
-      chain        11155111
-      gas estimate 21227
+## Creative direction
+- Tone: polished. The product is a safety mechanism; the film should feel controlled.
+- Footage sits inside a light window frame carrying the real URL or process name, so a viewer
+  always knows which surface they are looking at.
+- Captions are short and sit below the frame. They label what is happening; they do not
+  restate the narration.
+- The only added motion is a slow vertical drift across the explorer screenshot and fades on
+  the record cards. Recordings are never re-timed except for the two labelled 8x waits.
 
-    Nothing has moved.
+## Avoid
+- Re-typing terminal output as animated text. If it is not in the recording, it does not appear.
+- Unlabelled speed changes.
+- Dark styling on the composition's own scenes: the ElizaOS client is dark because that is how
+  it renders, and the contrast with the light frames is the honest look of a real capture.
 
-    confirm
-
-    transaction  0x5b537ffae10324d3b9e620c5b9647f51f24787b23b293d5097b75c5d3d5a048b
-    receipt      success, verified
-
-## Creative Direction
-- Tone preset: polished
-- Creative direction: a calm security film about the one second that matters
-- Interpretation: restraint is the point. Slow reveals, long holds, no kinetic text, no hype.
-  The product is a safety mechanism; the film should feel controlled rather than loud.
-- Angle: show the one second that does not exist in any other agent -- after the agent has
-  decided, before anything is irreversible. Every frame of terminal output is real and the
-  transaction hash resolves on Etherscan. The brag is a receipt, not a claim.
-- Hook: a transfer command types itself, then the line "An agent just decided where your money
-  goes."
-- Outro: plugin-keeperhub / The agent proposes. You approve. / ElizaOS x KeeperHub
-
-### Avoid
-- Generic SaaS language. No "streamline", no "seamless", no "empower".
-- Abstract filler: no floating particles, no glowing orbs, no generic blockchain cubes.
-- Dark terminal styling. This is deliberately a light piece -- the subject is clarity.
-- Purple, violet, magenta, or neon gradient accents.
-- Kinetic typography on any line the viewer must actually read.
-- Re-aligning the plan block. Its column alignment is the product.
-
-## Visual Identity
-Matches the README mermaid diagrams so documentation and film read as one system.
-
-- Background: `#fbfbfa`
-- Surface / terminal card: `#ffffff`, 1px border `#e6e6e3`, soft shadow, generous padding
-- Text: `#1f2328`
-- Muted text: `#57606a`
-- Accent, verified: `#1a7f45`
-- Accent, the gate: `#b8860b`
-- Accent, refusal: `#b42318`
-- Display font: Inter or system grotesque, weight 500, generous letter-spacing
-- Body / terminal font: JetBrains Mono, SF Mono, or system monospace
-- Visual references: the plan block's aligned label column; the green verified receipt
-
-## Storyboard
-`brag-output/brag-plan.md` is the creative contract. Scene summary:
-
-1. **The command** — 3.7s — terminal types the transfer request; overlay lands: "An agent just
-   decided where your money goes."
-2. **The stakes** — 4.2s — full-bleed: "Right 99% of the time is a treasury drained on the
-   hundredth transfer."
-3. **The plan** — 5.8s — the real dry-run block types in line by line, then settles and holds
-   at least 2s fully readable.
-4. **The gate** — 2.3s — "Nothing has moved." alone, large, centered, still.
-5. **The approval** — 2.2s — `confirm` types; receipt appears beneath with `success, verified`
-   in the verified green.
-5b. **The page** — 3.0s — the landing page in a browser frame, URL bar reading
-   `decodededan.github.io/plugin-keeperhub`, cropped to the hero. Caption: "The same gate,
-   playable in your browser." The capture is taken from the live URL with the
-   page held at the gate (`assets/images/site.png`), never redrawn in the composition.
-6. **The mark** — 1.8s — plugin-keeperhub / The agent proposes. You approve. / ElizaOS x
-   KeeperHub.
-
-## Readability contract
-Scene 3's plan block and scene 4's line are the two moments the whole film exists for. If
-timing has to give anywhere, it gives everywhere else first. The plan block holds a minimum of
-2 seconds fully settled. "Nothing has moved." holds a minimum of 1.5 seconds.
+## Visual identity
+Matches the landing page exactly: `#eef1ea` ledger ground with the ruled background, `#fdfdfb`
+cards, `#18211d` ink, `#b0810f` for the gate, `#15683a` for verified. IBM Plex Sans and IBM
+Plex Mono, embedded as woff2 in `assets/fonts/` so renders do not depend on a font CDN.
 
 ## Audio
-- Audio role: sparse professional accents over a low bed
-- Audio arc: fades in under the hook, sits low and steady through the stakes, lifts slightly
-  as the plan block lands, drops back for "Nothing has moved.", a single soft confirmation at
-  the receipt, then fades to silence under the outro.
-- Music: `happy-beats-business-moves-vol-9-by-ende-dot-app.mp3`, low volume bed throughout
-- Music cues: 114.84 BPM. Strong cues at 4.23s, 6.34s, 10.54s, 12.65s. Land the plan block
-  reveal near 10.54s and "Nothing has moved." near 12.65s. Beat grid ~0.52s apart for
-  sequencing the four plan lines.
-- SFX: keyboard keypresses under the two typed commands only; one quiet interface click at the
-  approval; one soft confirmation tone at the verified receipt. Nothing else.
-- Restraint rule: no riser, no whoosh, no stinger over text the viewer must parse. If a cue
-  would pull the eye off the plan block, cut it.
+- One WAV per narration line in `assets/voice/`, placed at the times listed in `brag-plan.md`.
+- Scene durations follow the measured narration, not the other way round.
+- Music bed at 0.06, no SFX.

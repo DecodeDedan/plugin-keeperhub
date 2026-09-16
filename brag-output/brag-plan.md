@@ -1,128 +1,80 @@
-# Brag Plan: plugin-keeperhub
+# Brag Plan: plugin-keeperhub — the 90 second demo
 
-## What is this app?
-An ElizaOS plugin that stops an AI agent from moving crypto on its own: the agent composes
-and dry runs a transfer, a human reads the exact plan, and only then does KeeperHub broadcast
-that plan byte for byte.
+## What this is
+A recorded demonstration, not a dramatisation. Every frame of product footage in this video
+is a screen recording of software actually running: the ElizaOS client at localhost:3000 with
+plugin-keeperhub loaded, the published landing page, and Etherscan. No terminal output is
+re-typed, re-enacted or rebuilt in the composition.
 
 ## The angle
-Not "look at our features." The video shows the one second that does not exist in any other
-agent: the moment after the agent has decided and before anything is irreversible.
+Show the whole loop, in order, without cutting away from the part that is usually hidden: the
+moment after the agent has decided and before anything is irreversible. The proof is that the
+transaction at the end exists on a public chain and can be checked by anyone watching.
 
-Every frame of terminal output in this video is real, captured from a live run against
-production KeeperHub on Ethereum Sepolia. The transaction hash resolves on Etherscan. That is
-the brag -- not a claim, a receipt.
+## What was captured, and how
 
-## Hook (first 2-3 seconds)
-A command types itself on a clean light terminal:
+| Source | Method | Length |
+|---|---|---|
+| ElizaOS session | Chrome DevTools screencast, frame by frame with arrival timestamps, driven through the real UI | 79.5s, 3660 frames |
+| Landing page | same, against the published URL | 16.0s, 102 frames |
+| Etherscan | page screenshot at 2x | still |
 
-    send 0.05 ETH to 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238
+The session ran once, start to finish: the request was typed into the chat, KEEPERHUB_SIMULATE
+returned a dry run, `confirm` was typed, and KEEPERHUB_CONFIRM broadcast it. The model was
+Ollama qwen2.5:14b running locally; KeeperHub was production, chain 11155111.
 
-Cursor blinks. One line over it: **An agent just decided where your money goes.**
+Broadcast: `0x14c5929f9d39527345fbfb9e7852f85cfcd84313853a6cd68fcdd75a8fdf2bc6`
+Receipt: success, block 11718633, gas used 47705, read from a public Sepolia node rather than
+from KeeperHub.
 
-The hook works because everyone watching has already imagined the failure.
+## Honest editing
+Two waits are sped up 8x, both labelled on screen while they run: 25 seconds of the local model
+composing, and 32 seconds between approval and the receipt. Nothing else is time-shifted, and
+no footage is reordered. The speed-up is the only manipulation in the video.
 
-## Key moments (the middle)
-- **The stakes, in one line.** "Right 99% of the time is a treasury drained on the hundredth
-  transfer." No hedging, no SaaS language.
-- **The plan block.** The real dry-run output types in: move, to, chain, gas estimate. This is
-  the product. It is also the most video-worthy thing the project has, because it is
-  monospace, specific, and unmistakably real.
-- **"Nothing has moved."** Held alone, full scale. The whole thesis in three words.
-- **The approval.** `confirm` types in. Then the receipt: transaction hash, `success, verified`.
-
-## Outro / punchline
-    plugin-keeperhub
-    The agent proposes. You approve.
-
-Then the pairing: ElizaOS x KeeperHub. Silence.
-
-## User flow worth showing
-Entry, key action, result -- the actual three beats of using it:
-1. User asks the agent for a transfer in plain English.
-2. The agent returns the exact plan and stops. Nothing has moved.
-3. User approves; KeeperHub broadcasts and the chain returns a verified receipt.
-
-## Tone
-- Preset: polished
-- Creative direction: a calm security film about the one second that matters
-- Interpretation: restraint is the point. Slow reveals, generous hold on every readable line,
-  no kinetic text, no hype. The product is a safety mechanism, so the video should feel
-  controlled rather than loud. Confidence through stillness.
-
-## Format: landscape -- 1920x1080
-## Duration: 22.8 seconds
-
-## Visual identity (from the project)
-Deliberately the same palette as the README mermaid diagrams, so docs and video read as one
-system. Light throughout -- a dark terminal would be the obvious choice and the wrong one here,
-because the piece is about clarity, not hacker mystique.
-
-- Background: `#fbfbfa` (warm off-white)
-- Surface / terminal card: `#ffffff`, border `#e6e6e3`
-- Text: `#1f2328`
-- Accent, verified/safe: `#1a7f45`
-- Accent, the gate: `#b8860b`
-- Accent, refusal: `#b42318`
-- Display font: a clean grotesque (Inter or system sans), medium weight, generous tracking
-- Body/terminal font: monospace (JetBrains Mono, SF Mono, or system mono)
-- Strongest visual element: the dry-run plan block in monospace, with its aligned label column
-
-## Share copy (draft)
-AI agents are probabilistic. Onchain transfers do not forgive that. plugin-keeperhub makes an
-ElizaOS agent dry run every transfer, show you the exact plan, and execute only that -- byte
-for byte. Real receipt, Sepolia, verified.
-
-## Audio direction
-- Role: sparse professional accents over a low bed
-- Music: `happy-beats-business-moves-vol-9-by-ende-dot-app.mp3` -- the only mood available is
-  upbeat corporate, which suits the real emotional beat here (control and relief) better than
-  a tense score would
-- Music treatment: start at 0.0s, low volume throughout (bed, never lead), gentle fade-in over
-  the first 0.5s, fade out across the final 1.5s into the outro silence
-- Music cue guidance: cue preset read from `assets/music/cues/...vol-9...md`. Track is
-  114.84 BPM. Strong cues in window: 4.23s, 6.34s, 10.54s, 12.65s. Use 6.34s for the plan
-  block reveal and 12.65s for "Nothing has moved." Beat grid available at ~0.52s spacing for
-  sequencing the four plan lines.
-- Audio-reactive treatment: subtle -- at most a light presence lift on the plan block reveal.
-  Nothing that pulses or distracts from reading monospace text.
-- SFX posture: sparse, motion-matched. Keyboard keypresses under the two typed commands only.
-  One quiet interface click at the approval. One soft confirmation tone at the verified
-  receipt. Nothing else.
-- Audio-coupled moments: the typed command (keypress), the plan block lines landing on the
-  beat grid, the `confirm` keystroke, the receipt check.
-- Restraint rule: audio must never compete with reading. No riser, no whoosh, no stinger on
-  text that the viewer needs to parse. If a cue would pull the eye off the plan block, cut it.
+## Format: landscape 1920x1080
+## Duration: 90.0 seconds
+## Tone: polished. A demo, narrated plainly, with the product doing the talking.
 
 ## Storyboard
 
-| # | Time | Duration | Content | Motion | Audio |
-|---|---|---|---|---|---|
-| 1 | 0.0-3.7s | 3.7s | Terminal types `send 0.05 ETH to 0x1c7D...`; cursor blinks. Overlay: **An agent just decided where your money goes.** | Type-on at ~28 chars/s, then overlay fades up at 2.4s and holds | Music fades in; keypress SFX under typing |
-| 2 | 3.7-7.9s | 4.2s | Full-bleed line: **Right 99% of the time is a treasury drained on the hundredth transfer.** | Slow fade up, hold, slow fade out. No movement. | Bed only; strong cue at 4.23s under the fade-up |
-| 3 | 7.9-13.7s | 5.8s | The real dry-run plan block types in, line by line: `move / to / chain / gas estimate`. Aligned label column. | Each line lands on a beat (~0.52s apart) starting at the 10.54s cue; block settles and holds ~2s so it is readable | Bed lifts slightly; no SFX over the block |
-| 4 | 13.7-16.0s | 2.3s | **Nothing has moved.** Alone, large, centered. | Fade up at the 12.65s strong cue, hold still | Bed drops to make room |
-| 5 | 16.0-18.2s | 2.2s | `confirm` types in. Receipt appears: `transaction 0x5b537ffa...` / `receipt success, verified` in green. | Type-on, then receipt fades up beneath | Keypress, one interface click, one soft confirm tone |
-| 5b | 18.2-21.2s | 3.0s | The landing page in a browser frame, URL bar reading `decodededan.github.io/plugin-keeperhub`, cropped to the hero where the working terminal sits. Caption: **The same gate, playable in your browser.** | Fade up, then a 1.035x drift over the capture so the page reads as a page, not a slide | Bed only |
-| 6 | 21.0-22.8s | 1.8s | **plugin-keeperhub** / The agent proposes. You approve. / ElizaOS x KeeperHub | Crossfade in, hold, music fades to silence | Music fade-out to silence |
+| # | Time | Duration | Content | Source |
+|---|---|---|---|---|
+| 1 | 0.0-6.0 | 6.0s | Logo, wordmark, "One agent, one transfer, recorded start to finish." | composition |
+| 2 | 6.0-10.7 | 4.7s | The request typed into the ElizaOS chat | footage, 1.5x |
+| 3 | 10.7-13.9 | 3.2s | The local model composing, labelled 8x | footage, 8x |
+| 4 | 13.9-19.9 | 6.0s | KEEPERHUB_SIMULATE returns the exact plan | footage, real time |
+| 5 | 19.9-28.4 | 8.5s | "Nothing has moved." held alone | composition |
+| 6 | 28.4-30.4 | 2.0s | `confirm` typed by a human | footage, real time |
+| 7 | 30.4-34.5 | 4.1s | KEEPERHUB_CONFIRM replaying the stored payload, labelled 8x | footage, 8x |
+| 8 | 34.5-40.4 | 5.9s | The receipt: execution id, transaction hash | footage, real time |
+| 9 | 40.4-48.4 | 8.0s | Task id, derived key and stored args from a dry run at capture time | docs/run.json |
+| 10 | 48.4-60.4 | 12.0s | Etherscan: success, block, internal transfer of 0.001 ETH | screenshot, slow drift |
+| 11 | 60.4-71.1 | 10.7s | The landing page running the same gate | footage, 1.2x |
+| 12 | 71.1-79.5 | 8.4s | Where each value on that page comes from | docs/run.json |
+| 13 | 79.5-90.0 | 10.5s | npm install, "The agent proposes. You approve.", ElizaOS x KeeperHub | composition |
 
-Scene durations sum to 22.8s.
+## Voiceover script
 
-## Re-cut note
-Scene 5b was added after the landing page shipped. The frame is a real capture of
-https://decodededan.github.io/plugin-keeperhub/ taken from the live URL with the page held at
-the gate -- the state a visitor reaches by clicking once -- not a rebuilt mock:
-a redrawn page drifts from what the link actually serves. The caption claims only what the
-page does -- it replays the same real dry-run output and stops at the same gate, and its own
-hint line says nothing there touches a chain.
+1. (0.6s) This is an ElizaOS agent with a wallet, a real one, on Ethereum Sepolia. Watch what happens when I ask it to move money.
+2. (9.0s) The request is plain English. The plugin does not sign anything. It asks KeeperHub to dry run the transfer against the real chain, and broadcasts nothing.
+3. (18.3s) Here is what comes back. The exact plan. The amount, the recipient, the chain, the gas estimate. And the line that matters: nothing has moved.
+4. (27.6s) The model has already done its work, before anything could move value. From here it contributes nothing at all.
+5. (34.2s) I approve. KeeperHub replays the stored payload byte for byte, under a key derived from the plan itself, so a retry can never execute the transfer twice.
+6. (48.9s) That is a real transaction hash. On Etherscan: success, block eleven seven one eight six three three, one thousandth of an ether transferred.
+7. (61.0s) The website runs the same gate, and it does not fake it either.
+8. (71.6s) Every line there is replayed from a capture file, and the receipt is checked against a public node, not against the service making the claim.
+9. (80.3s) Install it with npm. Your agent proposes, you approve, and KeeperHub executes exactly what you read.
+
+Voice: generated locally, one WAV per line, in `composition/assets/voice/`. Scene durations were
+set from the measured length of each line rather than the other way round.
+
+## Audio
+- Narration at full level, one track per line.
+- Music bed at 0.06 throughout, low enough to sit under speech without ducking automation.
+- No SFX: the footage is the evidence and stingers would only decorate it.
 
 ## Readability check
-- Scene 2 sentence: 12 words -> needs ~3.6s. Allocated 4.2s. Passes.
-- Scene 3 plan block: 4 short lines, sequenced then held ~2s settled. Passes.
-- Scene 4: 3 words -> needs ~0.9s. Allocated 2.3s. Passes, deliberately generous.
-- Scene 5b caption: 6 words -> needs ~1.8s. On screen settled from 19.45s to 20.75s, plus
-  the browser frame held from 18.3s. Passes.
-- Scene 6 tagline: the first draft ran 9 words ("The agent proposes. You approve. KeeperHub
-  executes exactly that.") needing ~2.7s against 1.8s allocated, so it failed this check and
-  was trimmed to "The agent proposes. You approve." -- 5 words, ~1.5s, fits with headroom. The
-  dropped clause is already carried by scene 3 and scene 5, so nothing is lost.
+- Every caption is 4 to 9 words and holds for the length of its scene, at least 2 seconds.
+- Scene 9 and 12 hold monospace records for 8 seconds each, the longest holds in the film.
+- The plan block in scene 4 is on screen for 6 seconds at real speed, unedited.
