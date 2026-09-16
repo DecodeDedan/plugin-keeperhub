@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>plugin-keeperhub — the agent proposes, you approve</title>
 <meta name="description" content="An ElizaOS plugin that dry runs every onchain transfer, shows you the exact plan, and executes only that — byte for byte." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1.4' y='1.4' width='29.2' height='29.2' rx='8' fill='%23eef1ea' stroke='%2318211d' stroke-width='1.8'/%3E%3Ccircle cx='8.6' cy='16' r='2.3' fill='%2318211d'/%3E%3Cpath d='M11.6 16h3.6' stroke='%2318211d' stroke-width='1.8' stroke-linecap='round'/%3E%3Cpath d='M17 7.4v17.2' stroke='%23b0810f' stroke-width='2.6' stroke-linecap='round'/%3E%3Cpath d='M19.9 16h4.1' stroke='%2318211d' stroke-width='1.8' stroke-linecap='round' stroke-dasharray='1.7 2.8'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -15,13 +16,15 @@
   --paper:#fdfdfb;
   --ink:#18211d;
   --rule:#ccd5c9;
+  --rule-soft:#dee4d9;
   --muted:#5c6b62;
   --verified:#1a7f45;
   --pending:#b0810f;
   --void:#a8291b;
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   --sans:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
-  --col:min(1080px,100% - 3rem);
+  --col:min(1180px,100% - 3rem);
+  --gap:clamp(1.25rem,2.4vw,2.25rem);
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -30,28 +33,56 @@ body{
   font-family:var(--sans);font-size:17px;line-height:1.62;
   -webkit-font-smoothing:antialiased;
 }
+/* The page is ruled like a ledger sheet, with the light falling from the two
+   accents the product actually uses: the gate amber and the verified green. */
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(1150px 620px at 8% -10%, rgba(176,129,15,.10), transparent 62%),
+    radial-gradient(880px 560px at 96% 4%, rgba(26,127,69,.09), transparent 58%),
+    repeating-linear-gradient(to bottom, var(--rule-soft) 0 1px, transparent 1px 34px);
+}
 .wrap{width:var(--col);margin-inline:auto}
 a{color:var(--ink);text-underline-offset:3px;text-decoration-thickness:1px}
 a:focus-visible,button:focus-visible{outline:2px solid var(--pending);outline-offset:3px;border-radius:3px}
+h1,h2,h3{text-wrap:balance}
 
 /* ---- masthead ---- */
-.masthead{display:flex;align-items:baseline;justify-content:space-between;gap:1.5rem;
-  padding:1.6rem 0 1.4rem;flex-wrap:wrap}
+.masthead{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;
+  padding:1.5rem 0;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.65rem}
+.brand svg{display:block;flex:none}
 .mark{font-family:var(--mono);font-weight:600;font-size:1.02rem;letter-spacing:-.01em}
-.meta{display:flex;gap:1.4rem;font-size:.9rem;color:var(--muted)}
+.meta{display:flex;gap:1.4rem;font-size:.9rem;color:var(--muted);align-items:center}
 
-/* ---- hero ---- */
-.hero{padding:3.2rem 0 1rem;border-top:1px solid var(--rule)}
-h1{text-wrap:balance;
-  font-family:var(--mono);font-weight:500;
-  font-size:clamp(1.9rem,4.6vw,3.35rem);line-height:1.16;letter-spacing:-.035em;
-  margin:0 0 1.15rem;max-width:20ch;
-}
-.standfirst{max-width:56ch;font-size:1.12rem;color:var(--muted);margin:0 0 2.4rem}
+/* ---- hero: copy left, live terminal right ---- */
+.hero{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap);
+  padding:2.4rem 0 3.4rem;border-top:1px solid var(--rule);align-items:start}
+.hero-copy{grid-column:1 / span 5;min-width:0}
+.hero-stage{grid-column:6 / span 7;display:grid;gap:.85rem;min-width:0}
+h1{font-family:var(--mono);font-weight:500;
+  font-size:clamp(1.95rem,3.4vw,3rem);line-height:1.14;letter-spacing:-.035em;
+  margin:0 0 1.15rem}
+.standfirst{font-size:1.1rem;color:var(--muted);margin:0 0 1.8rem;max-width:40ch}
+.proofs{display:grid;gap:.55rem;font-size:.9rem;color:var(--muted);
+  border-top:1px solid var(--rule);padding-top:1.1rem}
+.proofs b{font-family:var(--mono);font-weight:600;color:var(--ink);font-size:.95rem}
+
+/* State strip: driven by the same flow as the terminal below it. */
+.stages{display:flex;gap:.4rem;flex-wrap:wrap;font-family:var(--mono);font-size:.78rem}
+.stages span{padding:.28rem .6rem;border:1px solid var(--rule);border-radius:99px;
+  background:var(--paper);color:var(--muted);transition:color .16s,border-color .16s,background-color .16s}
+body[data-stage="held"] .stages .s-composed,
+body[data-stage="executed"] .stages .s-composed,
+body[data-stage="discarded"] .stages .s-composed{color:var(--ink);border-color:var(--ink)}
+body[data-stage="held"] .stages .s-held{color:var(--pending);border-color:var(--pending);background:#fbf4e2}
+body[data-stage="executed"] .stages .s-held{color:var(--ink);border-color:var(--ink)}
+body[data-stage="executed"] .stages .s-executed{color:var(--verified);border-color:var(--verified);background:#e9f4ec}
+body[data-stage="discarded"] .stages .s-held{color:var(--void);border-color:var(--void);background:#fbeceb}
 
 /* ---- terminal ---- */
 .term{
-  background:var(--paper);border:1px solid var(--rule);border-radius:10px;
+  background:var(--paper);border:1px solid var(--rule);border-radius:12px;
   font-family:var(--mono);font-size:.94rem;line-height:1.75;
   padding:1.3rem 1.5rem;overflow-x:auto;
 }
@@ -64,72 +95,126 @@ h1{text-wrap:balance;
   vertical-align:-.17em;animation:blink 1.06s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
 
-.stage{display:grid;gap:.85rem}
 .controls{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
 button{
   font:inherit;font-family:var(--mono);font-size:.9rem;
   background:var(--ink);color:var(--paper);border:1px solid var(--ink);
-  padding:.62rem 1.15rem;border-radius:7px;cursor:pointer;
+  padding:.62rem 1.15rem;border-radius:8px;cursor:pointer;
+  transition:transform .16s ease,opacity .16s ease;
 }
+button:hover{transform:translateY(-1px)}
 button.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
 button.go{background:var(--verified);border-color:var(--verified)}
-button[disabled]{opacity:.35;cursor:not-allowed}
-.hint{font-size:.87rem;color:var(--muted)}
+button[disabled]{opacity:.35;cursor:not-allowed;transform:none}
+.hint{font-size:.87rem;color:var(--muted);max-width:44ch}
 .hint strong{font-weight:500;color:var(--ink)}
 
-/* ---- sections ---- */
-section{padding:4.2rem 0;border-top:1px solid var(--rule)}
-h2{font-size:1.5rem;font-weight:600;letter-spacing:-.018em;margin:0 0 1.1rem;max-width:44ch;text-wrap:balance}
+/* ---- sections: heading rail left, content right ---- */
+.sec{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap);
+  padding:3.6rem 0;border-top:1px solid var(--rule)}
+.rail{grid-column:1 / span 3;min-width:0}
+.body{grid-column:5 / span 8;min-width:0}
+.rail h2{font-size:1.24rem;font-weight:600;letter-spacing:-.018em;line-height:1.3;margin:0;
+  position:sticky;top:1.6rem}
 p{max-width:66ch;margin:0 0 1.05rem}
+.body > p:last-child{margin-bottom:0}
 .lede{font-size:1.06rem}
 
-/* ---- ledger table: ruled rows, not identical cards ---- */
-.ledger{width:100%;border-collapse:collapse;margin-top:.4rem;font-size:.96rem}
-.ledger td{padding:.85rem 0;border-top:1px solid var(--rule);vertical-align:top}
-.ledger tr:last-child td{border-bottom:1px solid var(--rule)}
-.ledger td:first-child{font-family:var(--mono);font-size:.88rem;white-space:nowrap;
-  padding-right:2rem;width:1%}
-.ledger td:last-child{color:var(--muted)}
+/* ---- step cards: this content really is a sequence, so it is numbered ---- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;counter-reset:step}
+.step{background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:1.1rem 1.2rem}
+.step::before{counter-increment:step;content:counter(step);
+  font-family:var(--mono);font-size:.8rem;color:var(--muted);
+  display:block;margin-bottom:.5rem}
+.step h3{font-family:var(--mono);font-size:.95rem;font-weight:600;margin:0 0 .4rem;letter-spacing:-.01em}
+.step p{font-size:.93rem;color:var(--muted);margin:0;max-width:none}
+.step.gate{border-color:var(--pending);background:#fcf7ea}
+.step.gate h3{color:#8a6409}
 
-.pairs{width:100%;border-collapse:collapse;font-size:.93rem;margin-top:.6rem}
+/* ---- action cards: the left rule carries what the action is allowed to do ---- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(226px,1fr));gap:1rem}
+.card{background:var(--paper);border:1px solid var(--rule);border-left:3px solid var(--kind,var(--rule));
+  border-radius:12px;padding:1.05rem 1.15rem;
+  transition:border-color .16s ease,transform .16s ease}
+.card:hover{transform:translateY(-2px);border-color:var(--ink);border-left-color:var(--kind,var(--ink))}
+.card h3{font-family:var(--mono);font-size:.88rem;font-weight:600;letter-spacing:-.01em;
+  margin:0 0 .45rem;overflow-wrap:anywhere}
+.card p{font-size:.92rem;color:var(--muted);margin:0;max-width:none}
+.k-read{--kind:var(--ink)}
+.k-dry{--kind:var(--pending)}
+.k-exec{--kind:var(--verified)}
+.k-log{--kind:var(--rule)}
+.legend{display:flex;gap:1.1rem;flex-wrap:wrap;font-size:.85rem;color:var(--muted);margin:1rem 0 0}
+.legend i{display:inline-block;width:.7rem;height:.7rem;border-radius:2px;margin-right:.4rem;vertical-align:-1px}
+
+/* ---- failure matrix: a condition/outcome table stays a table ---- */
+.pairs{width:100%;border-collapse:collapse;font-size:.93rem}
 .pairs td{padding:.72rem 0;border-top:1px solid var(--rule);vertical-align:top}
-.pairs td:first-child{width:38%;padding-right:1.6rem;color:var(--muted)}
+.pairs tr:last-child td{border-bottom:1px solid var(--rule)}
+.pairs td:first-child{width:38%;padding-right:1.6rem;font-family:var(--mono);font-size:.85rem}
+.pairs td:last-child{color:var(--muted)}
 
-.receipt{background:var(--paper);border:1px solid var(--rule);border-radius:10px;
-  padding:1.3rem 1.5rem;font-family:var(--mono);font-size:.88rem;line-height:1.8;overflow-x:auto}
+.receipt{background:var(--paper);border:1px solid var(--rule);border-radius:12px;
+  padding:1.3rem 1.5rem;font-family:var(--mono);font-size:.88rem;line-height:1.8;
+  white-space:pre;overflow-x:auto}
 .receipt a{color:var(--verified)}
+.stamp{display:inline-block}
 
-.install{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
-  background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:1.1rem 1.4rem}
+.install{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:1.05rem 1.35rem}
 .install code{font-family:var(--mono);font-size:1rem}
+.install button{font-size:.82rem;padding:.45rem .85rem}
 
 footer{padding:3rem 0 4rem;border-top:1px solid var(--rule);color:var(--muted);font-size:.9rem}
-footer p{max-width:60ch}
+footer p{max-width:62ch}
 
-@media (prefers-reduced-motion:reduce){
-  .caret{animation:none}
-  *{transition:none!important}
+/* One orchestrated entrance, not a reveal on every section. */
+[data-rise]{opacity:0;transform:translateY(10px)}
+[data-rise].in{opacity:1;transform:none;transition:opacity .18s ease,transform .18s ease}
+
+@media (min-width:901px){
+  .hero-stage .term{min-height:19.5rem}
+}
+@media (max-width:900px){
+  .hero,.sec{grid-template-columns:1fr}
+  .hero{padding-top:1.8rem}
+  .hero-copy,.hero-stage,.rail,.body{grid-column:auto}
+  .standfirst{max-width:60ch}
+  .rail h2{position:static;font-size:1.32rem;margin-bottom:.2rem}
+  .steps{grid-template-columns:1fr}
 }
 @media (max-width:620px){
   body{font-size:16px}
-  .term{font-size:.8rem;padding:1rem 1.1rem}
-  .receipt{font-size:.76rem}
-  /* Action names are single unbroken tokens wide enough to force a minimum
-     table width past the column. Stack the rows so each gets a full line. */
-  .ledger td,.pairs td{display:block;width:auto;padding-right:0}
-  .ledger td:first-child{white-space:normal;overflow-wrap:anywhere;
-    padding-bottom:.2rem;border-top:1px solid var(--rule)}
-  .ledger td:last-child{padding-top:0;border-top:0;padding-bottom:1rem}
-  .pairs td:first-child{width:auto;padding-bottom:.15rem;border-top:1px solid var(--rule)}
+  .term{font-size:.78rem;padding:1rem 1.05rem}
+  .receipt{font-size:.74rem}
+  .sec{padding:2.8rem 0}
+  /* Conditions are single unbroken tokens; stack so each keeps a full line. */
+  .pairs td{display:block;width:auto;padding-right:0}
+  .pairs td:first-child{padding-bottom:.15rem;border-top:1px solid var(--rule);overflow-wrap:anywhere}
   .pairs td:last-child{padding-top:0;border-top:0;padding-bottom:1rem}
-  .ledger tr:last-child td:last-child,.pairs tr:last-child td:last-child{border-bottom:1px solid var(--rule)}
+  .pairs tr:last-child td:first-child{border-bottom:0}
+}
+@media (prefers-reduced-motion:reduce){
+  .caret{animation:none}
+  *{transition:none!important}
+  [data-rise]{opacity:1;transform:none}
+  button:hover,.card:hover{transform:none}
 }
 </style>
 </head>
-<body>
+<body data-stage="idle">
 
 <header class="wrap masthead">
-  <span class="mark">plugin-keeperhub</span>
+  <span class="brand">
+    <svg viewBox="0 0 32 32" width="28" height="28" role="img" aria-label="plugin-keeperhub logo: a request stopped at a gate">
+      <rect x="1.4" y="1.4" width="29.2" height="29.2" rx="8" fill="var(--paper)" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="8.6" cy="16" r="2.3" fill="currentColor"/>
+      <path d="M11.6 16h3.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M17 7.4v17.2" stroke="#b0810f" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M19.9 16h4.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="1.7 2.8"/>
+    </svg>
+    <span class="mark">plugin-keeperhub</span>
+  </span>
   <span class="meta">
     <a href="https://www.npmjs.com/package/plugin-keeperhub">npm</a>
     <a href="https://github.com/DecodeDedan/plugin-keeperhub">source</a>
@@ -140,113 +225,164 @@ footer p{max-width:60ch}
 
 <main>
   <div class="wrap hero">
-    <h1>Your agent is about to move money.</h1>
-    <p class="standfirst">
-      It decides exactly what that means at the moment it happens, and by the time you can see
-      the decision it is already on chain. This plugin puts one step in between.
-    </p>
+    <div class="hero-copy">
+      <h1 data-rise>Your agent is about to move money.</h1>
+      <p class="standfirst" data-rise>
+        It decides exactly what that means at the moment it happens, and by the time you can see
+        the decision it is already on chain. This plugin puts one step in between.
+      </p>
+      <div class="proofs" data-rise>
+        <div><b>123 tests</b> across 7 files, 117 of them with no credentials and no network</div>
+        <div><b>1 receipt</b> on Ethereum Sepolia that resolves on Etherscan</div>
+        <div><b>0 code paths</b> from the model to a broadcast</div>
+      </div>
+    </div>
 
-    <div class="stage">
-      <div class="term" id="term" aria-live="polite" aria-atomic="false"><pre id="out"><span class="prompt">you</span>
+    <div class="hero-stage">
+      <div class="stages" data-rise aria-hidden="true">
+        <span class="s-composed">composed</span>
+        <span class="s-held">held for approval</span>
+        <span class="s-executed">executed</span>
+      </div>
+      <div class="term" id="term" data-rise aria-live="polite" aria-atomic="false"><pre id="out"><span class="prompt">you</span>
 send 0.05 ETH to 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238<span class="caret" id="caret"></span></pre></div>
-      <div class="controls" id="controls">
+      <div class="controls" id="controls" data-rise>
         <button id="run">Ask the agent</button>
         <span class="hint" id="hint">Real output from a live run. Nothing here touches a chain.</span>
       </div>
     </div>
   </div>
 
-  <section class="wrap">
-    <h2>An agent that is right 99% of the time drains a treasury on its hundredth transfer</h2>
-    <p class="lede">
-      The model is not the problem. Being asked to be exact, once, with no second look, on the
-      one operation that cannot be undone is.
-    </p>
-    <p>
-      A confirmation prompt does not fix this. It confirms an intent, not a transaction. A
-      spending cap bounds the damage rather than preventing the mistake. Asking the model to
-      restate its plan just asks a probabilistic system to describe itself.
-    </p>
-    <p>
-      So the model contributes exactly once, before anything is reviewable, and what it produced
-      is shown to a person before it can move value. On approval the stored payload is replayed
-      byte for byte. Nothing is inferred at execution time, because by then there is nothing left
-      to infer.
-    </p>
+  <section class="wrap sec">
+    <div class="rail"><h2>An agent that is right 99% of the time drains a treasury on its hundredth transfer</h2></div>
+    <div class="body">
+      <p class="lede">
+        The model is not the problem. Being asked to be exact, once, with no second look, on the
+        one operation that cannot be undone is.
+      </p>
+      <p>
+        A confirmation prompt does not fix this. It confirms an intent, not a transaction. A
+        spending cap bounds the damage rather than preventing the mistake. Asking the model to
+        restate its plan just asks a probabilistic system to describe itself.
+      </p>
+      <p>
+        So the model contributes exactly once, before anything is reviewable, and what it produced
+        is shown to a person before it can move value. On approval the stored payload is replayed
+        byte for byte. Nothing is inferred at execution time, because by then there is nothing left
+        to infer.
+      </p>
+    </div>
   </section>
 
-  <section class="wrap">
-    <h2>What gets installed</h2>
-    <table class="ledger">
-      <tbody>
-        <tr><td>KEEPERHUB_WALLET</td><td>A provider that puts the real wallet, the enforced daily cap, and the remaining headroom into the agent's context, so it reasons against limits that exist.</td></tr>
-        <tr><td>KEEPERHUB_SIMULATE</td><td>Dry runs a token transfer. Has no code path that broadcasts.</td></tr>
-        <tr><td>KEEPERHUB_SIMULATE_CALL</td><td>Dry runs a contract call, including payable functions.</td></tr>
-        <tr><td>KEEPERHUB_SIMULATE_CONDITIONAL</td><td>Dry runs a conditional action: read one value, act only if a comparison holds.</td></tr>
-        <tr><td>KEEPERHUB_CONFIRM</td><td>Replays the reviewed plan. Has no code path that constructs arguments.</td></tr>
-        <tr><td>KEEPERHUB_STATUS</td><td>Reads back whether a broadcast settled, because <em>unconfirmed</em> is a real outcome and the answer to it is to poll, never to re-send.</td></tr>
-        <tr><td>KEEPERHUB_RECORD_EXECUTION</td><td>An evaluator that writes each execution into agent memory.</td></tr>
-      </tbody>
-    </table>
+  <section class="wrap sec">
+    <div class="rail"><h2>Three moves, and the model only reaches the first</h2></div>
+    <div class="body">
+      <div class="steps">
+        <div class="step">
+          <h3>Compose and dry run</h3>
+          <p>The model extracts the address, amount and chain. KeeperHub simulates it. A mangled address or a revert ends here, and nothing is queued.</p>
+        </div>
+        <div class="step gate">
+          <h3>Hold for a person</h3>
+          <p>The exact simulated payload is stored and shown. Ambiguous replies do not pass. This is the step that does not exist anywhere else.</p>
+        </div>
+        <div class="step">
+          <h3>Replay byte for byte</h3>
+          <p>Confirming drops <code>simulate</code>, attaches the derived key, and sends the stored bytes. No argument is rebuilt at execution time.</p>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <section class="wrap">
-    <h2>The idempotency key is derived, never generated</h2>
-    <p>
-      A key minted per attempt does not survive a retry: the second attempt sends a different
-      key, KeeperHub treats the request as new work, and the transfer executes twice. So a task
-      id is minted once when the dry run queues the plan, and the key is a SHA-256 of that id
-      joined with the fields that decide the onchain effect — chain aliases resolved, addresses
-      lowercased, amounts normalised.
-    </p>
-    <p>
-      Every attempt at one plan sends one key. A fresh dry run is different work and gets a
-      different one. That property is what makes the retry rule safe: keep the plan when nothing
-      definite is known, discard it once an outcome is settled.
-    </p>
+  <section class="wrap sec">
+    <div class="rail"><h2>What gets installed</h2></div>
+    <div class="body">
+      <div class="cards">
+        <div class="card k-read"><h3>KEEPERHUB_WALLET</h3><p>A provider that puts the real wallet, the enforced daily cap, and the remaining headroom into the agent's context, so it reasons against limits that exist.</p></div>
+        <div class="card k-dry"><h3>KEEPERHUB_SIMULATE</h3><p>Dry runs a token transfer. Has no code path that broadcasts.</p></div>
+        <div class="card k-dry"><h3>KEEPERHUB_SIMULATE_CALL</h3><p>Dry runs a contract call, including payable functions.</p></div>
+        <div class="card k-dry"><h3>KEEPERHUB_SIMULATE_CONDITIONAL</h3><p>Dry runs a conditional action: read one value, act only if a comparison holds.</p></div>
+        <div class="card k-exec"><h3>KEEPERHUB_CONFIRM</h3><p>Replays the reviewed plan. Has no code path that constructs arguments.</p></div>
+        <div class="card k-read"><h3>KEEPERHUB_STATUS</h3><p>Reads back whether a broadcast settled, because <em>unconfirmed</em> is a real outcome and the answer to it is to poll, never to re-send.</p></div>
+        <div class="card k-log"><h3>KEEPERHUB_RECORD_EXECUTION</h3><p>An evaluator that writes each execution into agent memory.</p></div>
+      </div>
+      <p class="legend">
+        <span><i style="background:var(--ink)"></i>reads state</span>
+        <span><i style="background:var(--pending)"></i>dry runs only</span>
+        <span><i style="background:var(--verified)"></i>can broadcast</span>
+        <span><i style="background:var(--rule)"></i>records after the fact</span>
+      </p>
+    </div>
   </section>
 
-  <section class="wrap">
-    <h2>It survives the paths that are not the happy one</h2>
-    <table class="pairs">
-      <tbody>
-        <tr><td>Model mangles an address</td><td>Rejected before any call. Nothing queued.</td></tr>
-        <tr><td>Dry run says it would revert</td><td>Nothing queued, with the decoded reason.</td></tr>
-        <tr><td>Simulator cannot reach the chain</td><td>Reported as unavailable, explicitly not as a revert — nothing was learned either way.</td></tr>
-        <tr><td>Broadcast returns unconfirmed</td><td>Reported as in flight, never as success or failure. Calling a live transaction failed is what provokes a double spend.</td></tr>
-        <tr><td>Broadcast times out</td><td>Plan kept. Confirming again derives the same key and replays.</td></tr>
-        <tr><td>User replies ambiguously</td><td>Approval must be unmistakable. Nothing broadcasts.</td></tr>
-        <tr><td>User approves twice</td><td>The plan is consumed on the first take.</td></tr>
-        <tr><td>Solana chain</td><td>Refused before any call. The dry run is EVM-only, and this will not broadcast what it could not preview.</td></tr>
-      </tbody>
-    </table>
+  <section class="wrap sec">
+    <div class="rail"><h2>The idempotency key is derived, never generated</h2></div>
+    <div class="body">
+      <p>
+        A key minted per attempt does not survive a retry: the second attempt sends a different
+        key, KeeperHub treats the request as new work, and the transfer executes twice. So a task
+        id is minted once when the dry run queues the plan, and the key is a SHA-256 of that id
+        joined with the fields that decide the onchain effect — chain aliases resolved, addresses
+        lowercased, amounts normalised.
+      </p>
+      <p>
+        Every attempt at one plan sends one key. A fresh dry run is different work and gets a
+        different one. That property is what makes the retry rule safe: keep the plan when nothing
+        definite is known, discard it once an outcome is settled.
+      </p>
+    </div>
   </section>
 
-  <section class="wrap">
-    <h2>A real receipt</h2>
-    <p>Executed against production KeeperHub on Ethereum Sepolia. The hash resolves.</p>
-    <div class="receipt">execution    qwkk13npsccznblf3m6gr
+  <section class="wrap sec">
+    <div class="rail"><h2>It survives the paths that are not the happy one</h2></div>
+    <div class="body">
+      <table class="pairs">
+        <tbody>
+          <tr><td>Model mangles an address</td><td>Rejected before any call. Nothing queued.</td></tr>
+          <tr><td>Dry run says it would revert</td><td>Nothing queued, with the decoded reason.</td></tr>
+          <tr><td>Simulator cannot reach the chain</td><td>Reported as unavailable, explicitly not as a revert — nothing was learned either way.</td></tr>
+          <tr><td>Broadcast returns unconfirmed</td><td>Reported as in flight, never as success or failure. Calling a live transaction failed is what provokes a double spend.</td></tr>
+          <tr><td>Broadcast times out</td><td>Plan kept. Confirming again derives the same key and replays.</td></tr>
+          <tr><td>User replies ambiguously</td><td>Approval must be unmistakable. Nothing broadcasts.</td></tr>
+          <tr><td>User approves twice</td><td>The plan is consumed on the first take.</td></tr>
+          <tr><td>Solana chain</td><td>Refused before any call. The dry run is EVM-only, and this will not broadcast what it could not preview.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="wrap sec">
+    <div class="rail"><h2>A real receipt</h2></div>
+    <div class="body">
+      <p>Executed against production KeeperHub on Ethereum Sepolia. The hash resolves.</p>
+      <div class="receipt" id="receipt">execution    qwkk13npsccznblf3m6gr
 transaction  <a href="https://sepolia.etherscan.io/tx/0x5b537ffae10324d3b9e620c5b9647f51f24787b23b293d5097b75c5d3d5a048b">0x5b537ffae10324d3b9e620c5b9647f51f24787b23b293d5097b75c5d3d5a048b</a>
 block        11712998
-receipt      <span class="ok">success, verified</span>
+receipt      <span class="ok stamp" id="stamp">success, verified</span>
 gas used     74781</div>
+    </div>
   </section>
 
-  <section class="wrap">
-    <h2>Install</h2>
-    <div class="install"><code>npm install plugin-keeperhub</code></div>
-    <p style="margin-top:1.4rem">Add it to your character and give it an organisation API key:</p>
-    <div class="term"><pre>{
+  <section class="wrap sec">
+    <div class="rail"><h2>Install</h2></div>
+    <div class="body">
+      <div class="install">
+        <code id="cmd">npm install plugin-keeperhub</code>
+        <button class="ghost" id="copy" type="button">Copy</button>
+      </div>
+      <p style="margin-top:1.4rem">Add it to your character and give it an organisation API key:</p>
+      <div class="term"><pre>{
   "plugins": ["plugin-keeperhub"],
   "settings": {
     "secrets": { "KEEPERHUB_API_KEY": "kh_..." }
   }
 }</pre></div>
-    <p style="margin-top:1.4rem">
-      The default chain is Ethereum Sepolia, on purpose. Point it at mainnet deliberately, never
-      by forgetting to. A key scoped <code>mcp:read</code> can dry run but is refused on
-      broadcast; broadcasting needs <code>mcp:write</code> or <code>mcp:admin</code>.
-    </p>
+      <p style="margin-top:1.4rem">
+        The default chain is Ethereum Sepolia, on purpose. Point it at mainnet deliberately, never
+        by forgetting to. A key scoped <code>mcp:read</code> can dry run but is refused on
+        broadcast; broadcasting needs <code>mcp:write</code> or <code>mcp:admin</code>.
+      </p>
+    </div>
   </section>
 </main>
 
@@ -256,7 +392,7 @@ gas used     74781</div>
     organisation and are reads or dry runs only. The safety properties are mutation tested —
     each one is broken on purpose to confirm the suite catches it.
   </p>
-  <p style="margin-top:1rem">MIT licensed. Built for ElizaOS.</p>
+  <p style="margin-top:1rem">MIT licensed, © 2026 Dedan Okware. Built for ElizaOS.</p>
 </footer>
 
 <script>
@@ -290,6 +426,8 @@ gas used     74781</div>
     '<span class="no">Discarded.</span> The plan is gone and nothing was sent.\n' +
     'Ask again and it will dry run from scratch.';
 
+  function stage(name){ document.body.dataset.stage = name; }
+
   // Reveal on a whole-line cadence: a character-by-character crawl would make
   // the one block a visitor actually needs to read the slowest thing here.
   function reveal(html, done){
@@ -309,6 +447,7 @@ gas used     74781</div>
     run.disabled = true;
     hint.textContent = "Running the dry run. Nothing is signed or broadcast.";
     reveal(PLAN, function(){
+      stage("held");
       setControls(
         '<button class="go" id="approve">Approve</button>' +
         '<button class="ghost" id="discard">Discard</button>' +
@@ -316,17 +455,50 @@ gas used     74781</div>
       );
       document.getElementById("approve").addEventListener("click", function(){
         reveal(DONE, function(){
+          stage("executed");
           setControls('<span class="hint">That hash is real. It is the same transaction linked further down this page.</span>');
         });
       });
       document.getElementById("discard").addEventListener("click", function(){
         reveal(DISCARDED, function(){
+          stage("discarded");
           setControls('<button id="again">Ask the agent</button><span class="hint">Nothing was sent.</span>');
           document.getElementById("again").addEventListener("click", function(){ location.reload(); });
         });
       });
     });
   });
+
+  // Copy the install line, and say what happened rather than animating a tick.
+  var copy = document.getElementById("copy");
+  copy.addEventListener("click", function(){
+    var cmd = document.getElementById("cmd").textContent;
+    var say = function(text){ copy.textContent = text; setTimeout(function(){ copy.textContent = "Copy"; }, 1600); };
+    if (!navigator.clipboard) { say("Select it"); return; }
+    navigator.clipboard.writeText(cmd).then(function(){ say("Copied"); }, function(){ say("Select it"); });
+  });
+
+  // One entrance sequence on load, and one stamp when the receipt is reached.
+  var risers = document.querySelectorAll("[data-rise]");
+  if (reduced) {
+    risers.forEach(function(el){ el.classList.add("in"); });
+  } else {
+    risers.forEach(function(el, i){ setTimeout(function(){ el.classList.add("in"); }, 60 + i * 70); });
+    if ("IntersectionObserver" in window) {
+      var stamp = document.getElementById("stamp");
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if (!e.isIntersecting) return;
+          stamp.animate(
+            [{ opacity: 0, transform: "scale(1.06)" }, { opacity: 1, transform: "scale(1)" }],
+            { duration: 180, easing: "ease-out" }
+          );
+          io.disconnect();
+        });
+      }, { threshold: 0.6 });
+      io.observe(document.getElementById("receipt"));
+    }
+  }
 })();
 </script>
 </body>
