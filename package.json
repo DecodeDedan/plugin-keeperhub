@@ -1,6 +1,6 @@
 {
   "name": "plugin-keeperhub",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Deterministic onchain execution for ElizaOS agents. The agent composes and dry runs; a human approves; KeeperHub executes the exact reviewed plan.",
   "type": "module",
   "main": "dist/index.js",
@@ -47,6 +47,7 @@
   "devDependencies": {
     "@elizaos/core": "^1.0.0",
     "@types/node": "^22.20.3",
+    "puppeteer-core": "^25.11.0",
     "typescript": "^5.7.0",
     "vitest": "^3.0.0"
   },

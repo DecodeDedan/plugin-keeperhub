@@ -48,6 +48,6 @@ cards, `#18211d` ink, `#b0810f` for the gate, `#15683a` for verified. IBM Plex S
 Plex Mono, embedded as woff2 in `assets/fonts/` so renders do not depend on a font CDN.
 
 ## Audio
-- One WAV per narration line in `assets/voice/`, placed at the times listed in `brag-plan.md`.
-- Scene durations follow the measured narration, not the other way round.
-- Music bed at 0.06, no SFX.
+- No narration. A single music bed at 0.40 for the full 90 seconds, no SFX.
+- Captions carry the commentary; the two longest shots swap caption once on a crossfade so no
+  line has to hold for twelve seconds.

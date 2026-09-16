@@ -36,56 +36,11 @@ shown to a person before it can move value.
 
 ## How it works
 
-```mermaid
-flowchart TD
-    msg["User: send 0.05 ETH to 0x1c7D..."]
+![The execution path: the model may influence everything before the dry run, and can reach nothing after it](https://raw.githubusercontent.com/DecodeDedan/plugin-keeperhub/main/docs/diagrams/execution-path.png)
 
-    subgraph phase1["The model may influence everything in here"]
-        direction TB
-        llm["Model extracts<br/>address, amount, chain"]
-        validate{"Shape valid?"}
-        refuse1["Refuse.<br/>Nothing queued."]
-        dryrun["KeeperHub dry run<br/>simulate: true"]
-        clean{"Clean pass?"}
-        refuse2["Report the real reason.<br/>Nothing queued."]
-        store[("Plan stored verbatim<br/>task id minted")]
-        llm --> validate
-        validate -->|"negative amount<br/>mangled address<br/>not JSON"| refuse1
-        validate -->|yes| dryrun
-        dryrun --> clean
-        clean -->|"would revert<br/>simulator unavailable<br/>insufficient balance"| refuse2
-        clean -->|yes| store
-    end
-
-    human>"Human reads the exact plan"]
-
-    subgraph phase2["The model cannot reach anything in here"]
-        direction TB
-        confirm["Replay stored bytes<br/>drop simulate<br/>attach derived key"]
-        broadcast["KeeperHub signs and broadcasts"]
-        receipt["Receipt re-fetched from chain"]
-        confirm --> broadcast
-        broadcast --> receipt
-    end
-
-    msg --> llm
-    store --> human
-    human -->|"explicit approval only"| confirm
-
-    classDef step fill:#ffffff,stroke:#57606a,stroke-width:1px,color:#1f2328
-    classDef gate fill:#f6f8fa,stroke:#57606a,stroke-width:1px,color:#1f2328
-    classDef stop fill:#fdeded,stroke:#b42318,stroke-width:1px,color:#1f2328
-    classDef good fill:#e8f5ec,stroke:#1a7f45,stroke-width:1px,color:#1f2328
-
-    class msg,llm,dryrun,confirm,broadcast step
-    class validate,clean gate
-    class refuse1,refuse2 stop
-    class store step
-    class human,receipt good
-
-    style phase1 fill:#fdf6e3,stroke:#b8860b,color:#1f2328
-    style phase2 fill:#eef3f8,stroke:#3d6e99,color:#1f2328
-```
+<sub>Diagram source: [`docs/diagrams/execution-path.mmd`](https://github.com/DecodeDedan/plugin-keeperhub/blob/main/docs/diagrams/execution-path.mmd). npm renders mermaid
+blocks as source rather than as pictures, so the README ships the rendered files; regenerate
+them with `node scripts/render-diagrams.mjs`.</sub>
 
 The boundary between the two shaded regions is the whole design, and it is structural rather
 than procedural:
@@ -135,22 +90,11 @@ different one, so two deliberate identical transfers do not collide inside the r
 
 That property is what makes the retry rule safe:
 
-```mermaid
-flowchart TD
-    b["Broadcast returns"] --> q{"Is the outcome definite?"}
-    q -->|"completed, failed,<br/>idempotency_conflict"| discard["Discard the plan.<br/>A later attempt is new work."]
-    q -->|"timeout, 5xx,<br/>idempotency_in_progress"| keep["Keep the plan.<br/>A retry derives the SAME key,<br/>so KeeperHub replays<br/>instead of sending again."]
+![The retry rule: discard the plan only when the outcome is definite, otherwise keep it so a retry replays under the same key](https://raw.githubusercontent.com/DecodeDedan/plugin-keeperhub/main/docs/diagrams/retry-rule.png)
 
-    classDef step fill:#ffffff,stroke:#57606a,stroke-width:1px,color:#1f2328
-    classDef gate fill:#f6f8fa,stroke:#57606a,stroke-width:1px,color:#1f2328
-    classDef good fill:#e8f5ec,stroke:#1a7f45,stroke-width:1px,color:#1f2328
-    classDef cool fill:#eef3f8,stroke:#3d6e99,stroke-width:1px,color:#1f2328
-
-    class b step
-    class q gate
-    class discard cool
-    class keep good
-```
+<sub>Diagram source: [`docs/diagrams/retry-rule.mmd`](https://github.com/DecodeDedan/plugin-keeperhub/blob/main/docs/diagrams/retry-rule.mmd). npm renders mermaid
+blocks as source rather than as pictures, so the README ships the rendered files; regenerate
+them with `node scripts/render-diagrams.mjs`.</sub>
 
 Rotating the key after a timeout is what turns one intent into two transactions. Keeping a
 plan after a definite failure makes a dead key replay that failure for 24 hours. Both
@@ -234,7 +178,7 @@ revert, reporting an unconfirmed broadcast as settled, dropping the Solana guard
 amount canonicalization, leaving the task-id separator unescaped, and weakening a response
 guard to accept any shape.
 
-See [DEMO.md](./DEMO.md) to run it.
+See [DEMO.md](https://github.com/DecodeDedan/plugin-keeperhub/blob/main/DEMO.md) to run it.
 
 ## License
 

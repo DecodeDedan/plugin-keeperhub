@@ -1,0 +1,14 @@
+flowchart TD
+    b["Broadcast returns"] --> q{"Is the outcome definite?"}
+    q -->|"completed, failed,<br/>idempotency_conflict"| discard["Discard the plan.<br/>A later attempt is new work."]
+    q -->|"timeout, 5xx,<br/>idempotency_in_progress"| keep["Keep the plan.<br/>A retry derives the SAME key,<br/>so KeeperHub replays<br/>instead of sending again."]
+
+    classDef step fill:#ffffff,stroke:#57606a,stroke-width:1px,color:#1f2328
+    classDef gate fill:#f6f8fa,stroke:#57606a,stroke-width:1px,color:#1f2328
+    classDef good fill:#e8f5ec,stroke:#1a7f45,stroke-width:1px,color:#1f2328
+    classDef cool fill:#eef3f8,stroke:#3d6e99,stroke-width:1px,color:#1f2328
+
+    class b step
+    class q gate
+    class discard cool
+    class keep good

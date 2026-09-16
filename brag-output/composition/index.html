@@ -41,8 +41,9 @@
         color: #5c6b62; font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; font-size: 19px; }
       .stage video, .stage img { display: block; width: 100%; }
 
-      .caption { position: absolute; left: 0; right: 0; bottom: 34px; text-align: center;
-        font-size: 40px; font-weight: 500; letter-spacing: -.015em; color: #18211d; }
+      .caption { position: absolute; left: 50%; transform: translateX(-50%); bottom: 30px;
+        width: 1300px; text-align: center;
+        font-size: 37px; font-weight: 500; letter-spacing: -.015em; line-height: 1.3; color: #18211d; }
       .caption em { font-style: normal; color: #5c6b62; }
 
       .badge { position: absolute; right: 288px; top: 92px;
@@ -93,7 +94,7 @@
           <div class="chrome"><i></i><i></i><i></i><span>localhost:3000 — ElizaOS, plugin-keeperhub loaded</span></div>
           <video id="v1" src="assets/video/a-ask.mp4" muted data-start="6.0" data-duration="4.7" data-media-start="0"></video>
         </div>
-        <div id="s2cap" class="caption">A real agent, a real wallet. <em>Asked in plain English.</em></div>
+        <div id="s2cap" class="caption">A real ElizaOS agent, holding a real wallet. <em>The request is plain English.</em></div>
       </div>
 
       <!-- 3. WAITING ON THE MODEL -->
@@ -103,7 +104,7 @@
           <video id="v2" src="assets/video/b-wait1.mp4" muted data-start="10.7" data-duration="3.2" data-media-start="0"></video>
         </div>
         <div class="badge">8&times; — local model thinking</div>
-        <div class="caption">The model reads the request. <em>It never touches a key.</em></div>
+        <div class="caption">The model reads it. <em>It never touches a key.</em></div>
       </div>
 
       <!-- 4. THE PLAN -->
@@ -112,7 +113,8 @@
           <div class="chrome"><i></i><i></i><i></i><span>localhost:3000 — KEEPERHUB_SIMULATE, dry run against the real chain</span></div>
           <video id="v3" src="assets/video/c-plan.mp4" muted data-start="13.9" data-duration="6.0" data-media-start="0"></video>
         </div>
-        <div class="caption">The exact plan comes back. <em>Nothing is queued until it passes.</em></div>
+        <div id="s4c1" class="caption">KeeperHub dry runs it against the real chain.</div>
+        <div id="s4c2" class="caption" style="opacity:0">The exact plan that would execute. <em>Nothing is queued unless it passes.</em></div>
       </div>
 
       <!-- 5. THE GATE -->
@@ -120,6 +122,7 @@
         <div id="s5a" class="huge">Nothing has moved.</div>
         <div id="s5b" class="rule"></div>
         <div id="s5c" class="mono-note">the dry run reached the chain; the transfer did not</div>
+        <div id="s5d" class="mono-note" style="margin-top:14px">the model finished its work here, before anything could move value</div>
       </div>
 
       <!-- 6. APPROVAL -->
@@ -128,7 +131,7 @@
           <div class="chrome"><i></i><i></i><i></i><span>localhost:3000 — one word, typed by a human</span></div>
           <video id="v4" src="assets/video/d-confirm.mp4" muted data-start="28.4" data-duration="2.0" data-media-start="0"></video>
         </div>
-        <div class="caption">Approval is the only way past this point.</div>
+        <div class="caption">One word, typed by a human.</div>
       </div>
 
       <!-- 7. BROADCASTING -->
@@ -138,7 +141,7 @@
           <video id="v5" src="assets/video/e-wait2.mp4" muted data-start="30.4" data-duration="4.13" data-media-start="0"></video>
         </div>
         <div class="badge">8&times; — broadcasting</div>
-        <div class="caption">The stored bytes are replayed. <em>No argument is rebuilt.</em></div>
+        <div class="caption">The stored payload is replayed byte for byte. <em>No argument is rebuilt.</em></div>
       </div>
 
       <!-- 8. RECEIPT -->
@@ -147,7 +150,7 @@
           <div class="chrome"><i></i><i></i><i></i><span>localhost:3000 — the chain answered</span></div>
           <video id="v6" src="assets/video/f-receipt.mp4" muted data-start="34.53" data-duration="5.9" data-media-start="0"></video>
         </div>
-        <div class="caption">A transaction hash, from a real broadcast.</div>
+        <div class="caption">The chain answers. <em>An execution id and a transaction hash.</em></div>
       </div>
 
       <!-- 9. THE KEY -->
@@ -165,7 +168,8 @@
           <div class="chrome"><i></i><i></i><i></i><span>sepolia.etherscan.io/tx/0x14c5929f9d39527345fbfb9e7852f85cfcd84313853a6cd68fcdd75a8fdf2bc6</span></div>
           <div style="height:800px;overflow:hidden"><img id="s10img" src="assets/images/etherscan.png" alt="Etherscan transaction details" style="transform-origin:50% 0%"/></div>
         </div>
-        <div class="caption">Checked on a public explorer, not on our word for it.</div>
+        <div id="s10c1" class="caption">Success, block 11718633, on a public explorer.</div>
+        <div id="s10c2" class="caption" style="opacity:0">0.001 ETH moved, as an internal transfer. <em>Not our word for it.</em></div>
       </div>
 
       <!-- 11. THE SITE -->
@@ -174,7 +178,8 @@
           <div class="chrome"><i></i><i></i><i></i><span>decodededan.github.io/plugin-keeperhub</span></div>
           <video id="v7" src="assets/video/g-site.mp4" muted data-start="60.4" data-duration="10.66" data-media-start="0"></video>
         </div>
-        <div class="caption">The same gate, playable in your browser.</div>
+        <div id="s11c1" class="caption">The published page runs the same gate.</div>
+        <div id="s11c2" class="caption" style="opacity:0">Click once, and it stops exactly where the agent did.</div>
       </div>
 
       <!-- 12. PROVENANCE -->
@@ -193,16 +198,7 @@
       </div>
 
       <!-- AUDIO -->
-      <audio id="music" src="assets/audio/music.mp3" data-start="0" data-duration="90" data-volume="0.06"></audio>
-      <audio id="vo1" src="assets/voice/vo1.wav" data-start="0.6" data-duration="7.57" data-volume="1"></audio>
-      <audio id="vo2" src="assets/voice/vo2.wav" data-start="9.0" data-duration="8.83" data-volume="1"></audio>
-      <audio id="vo3" src="assets/voice/vo3.wav" data-start="18.3" data-duration="8.85" data-volume="1"></audio>
-      <audio id="vo4" src="assets/voice/vo4.wav" data-start="27.6" data-duration="6.0" data-volume="1"></audio>
-      <audio id="vo5" src="assets/voice/vo5.wav" data-start="34.2" data-duration="9.39" data-volume="1"></audio>
-      <audio id="vo6" src="assets/voice/vo6.wav" data-start="48.9" data-duration="8.55" data-volume="1"></audio>
-      <audio id="vo7" src="assets/voice/vo7.wav" data-start="61.0" data-duration="3.43" data-volume="1"></audio>
-      <audio id="vo9" src="assets/voice/vo9.wav" data-start="71.6" data-duration="7.26" data-volume="1"></audio>
-      <audio id="vo8" src="assets/voice/vo8.wav" data-start="80.3" data-duration="6.72" data-volume="1"></audio>
+      <audio id="music" src="assets/audio/music.mp3" data-start="0" data-duration="90" data-volume="0.40"></audio>
     </div>
 
     <script>
@@ -248,6 +244,16 @@
       fadeIn("#s12a", 71.4);
       rise("#s12b", 72.0, 0.5);
       tl.to("#s12", { opacity: 0, duration: 0.4, ease: "power1.inOut" }, 79.3);
+
+      // caption beats: the second line lands once the first has been read
+      const swap = (a, b, at) => {
+        tl.to(a, { opacity: 0, duration: 0.3, ease: "power1.inOut" }, at);
+        tl.fromTo(b, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.inOut" }, at + 0.25);
+      };
+      swap("#s4c1", "#s4c2", 16.6);
+      swap("#s10c1", "#s10c2", 54.4);
+      swap("#s11c1", "#s11c2", 65.9);
+      fadeIn("#s5d", 23.4);
 
       // 13 install and mark
       rise("#s13a", 79.8, 0.5);

@@ -54,24 +54,29 @@ no footage is reordered. The speed-up is the only manipulation in the video.
 | 12 | 71.1-79.5 | 8.4s | Where each value on that page comes from | docs/run.json |
 | 13 | 79.5-90.0 | 10.5s | npm install, "The agent proposes. You approve.", ElizaOS x KeeperHub | composition |
 
-## Voiceover script
+## Captions
 
-1. (0.6s) This is an ElizaOS agent with a wallet, a real one, on Ethereum Sepolia. Watch what happens when I ask it to move money.
-2. (9.0s) The request is plain English. The plugin does not sign anything. It asks KeeperHub to dry run the transfer against the real chain, and broadcasts nothing.
-3. (18.3s) Here is what comes back. The exact plan. The amount, the recipient, the chain, the gas estimate. And the line that matters: nothing has moved.
-4. (27.6s) The model has already done its work, before anything could move value. From here it contributes nothing at all.
-5. (34.2s) I approve. KeeperHub replays the stored payload byte for byte, under a key derived from the plan itself, so a retry can never execute the transfer twice.
-6. (48.9s) That is a real transaction hash. On Etherscan: success, block eleven seven one eight six three three, one thousandth of an ether transferred.
-7. (61.0s) The website runs the same gate, and it does not fake it either.
-8. (71.6s) Every line there is replayed from a capture file, and the receipt is checked against a public node, not against the service making the claim.
-9. (80.3s) Install it with npm. Your agent proposes, you approve, and KeeperHub executes exactly what you read.
+There is no narration. The captions carry the commentary, so each one holds for the length of
+its scene and the two longest shots change caption once, on a crossfade, rather than holding a
+single line for twelve seconds.
 
-Voice: generated locally, one WAV per line, in `composition/assets/voice/`. Scene durations were
-set from the measured length of each line rather than the other way round.
+| Scene | Caption |
+|---|---|
+| 2 | A real ElizaOS agent, holding a real wallet. The request is plain English. |
+| 3 | It reads the request. It never touches a key. |
+| 4 | KeeperHub dry runs it against the real chain. → The exact plan that would execute. Nothing is queued unless it passes. |
+| 5 | Nothing has moved. / the dry run reached the chain; the transfer did not / the model finished its work here, before anything could move value |
+| 6 | One word, typed by a human. |
+| 7 | The stored payload is replayed byte for byte. No argument is rebuilt. |
+| 8 | The chain answers. An execution id and a transaction hash. |
+| 9 | The key that makes a retry safe is derived, never generated |
+| 10 | Success, block 11718633, on a public explorer. → 0.001 ETH moved, as an internal transfer. Not our word for it. |
+| 11 | The published page runs the same gate. → Click once, and it stops exactly where the agent did. |
+| 12 | Nothing on that page is typed by hand |
+| 13 | npm install plugin-keeperhub / The agent proposes. You approve. |
 
 ## Audio
-- Narration at full level, one track per line.
-- Music bed at 0.06 throughout, low enough to sit under speech without ducking automation.
+- No voiceover. A music bed at 0.40 carries the whole 90 seconds: mean -23.0 dB, peak -5.4 dB.
 - No SFX: the footage is the evidence and stingers would only decorate it.
 
 ## Readability check
