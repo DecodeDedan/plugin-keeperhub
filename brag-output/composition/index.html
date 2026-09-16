@@ -71,11 +71,18 @@
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="main" data-start="0" data-duration="90"
+    <div id="root" data-composition-id="main" data-start="0" data-duration="105"
          data-width="1920" data-height="1080">
 
+      <!-- 0. THE STAKES -->
+      <div id="s0" class="clip center" data-start="0" data-duration="5.0" data-track-index="0">
+        <div id="s0a" class="huge" style="font-size:78px;max-width:1480px;text-align:center;line-height:1.16">An agent that is right 99% of the time<br/>drains a treasury on its hundredth transfer</div>
+        <div id="s0b" class="rule"></div>
+        <div id="s0c" class="mono-note">onchain, there is no undo</div>
+      </div>
+
       <!-- 1. TITLE -->
-      <div id="s1" class="clip center" data-start="0" data-duration="6.2" data-track-index="0">
+      <div id="s1" class="clip center" data-start="5" data-duration="6.2" data-track-index="0">
         <svg class="logo" viewBox="0 0 32 32" width="86" height="86" aria-hidden="true">
           <rect x="1.4" y="1.4" width="29.2" height="29.2" rx="8" fill="#fdfdfb" stroke="#18211d" stroke-width="1.8"/>
           <circle cx="8.6" cy="16" r="2.3" fill="#18211d"/>
@@ -89,36 +96,36 @@
       </div>
 
       <!-- 2. THE ASK -- real ElizaOS session -->
-      <div id="s2" class="clip" data-start="6.0" data-duration="4.7" data-track-index="1">
+      <div id="s2" class="clip" data-start="11" data-duration="4.7" data-track-index="1">
         <div class="stage">
           <div class="chrome"><i></i><i></i><i></i><span>localhost:3000 — ElizaOS, plugin-keeperhub loaded</span></div>
-          <video id="v1" src="assets/video/a-ask.mp4" muted data-start="6.0" data-duration="4.7" data-media-start="0"></video>
+          <video id="v1" src="assets/video/a-ask.mp4" muted data-start="11" data-duration="4.7" data-media-start="0"></video>
         </div>
         <div id="s2cap" class="caption">A real ElizaOS agent, holding a real wallet. <em>The request is plain English.</em></div>
       </div>
 
       <!-- 3. WAITING ON THE MODEL -->
-      <div id="s3" class="clip" data-start="10.7" data-duration="3.2" data-track-index="2">
+      <div id="s3" class="clip" data-start="15.7" data-duration="3.2" data-track-index="2">
         <div class="stage">
           <div class="chrome"><i></i><i></i><i></i><span>localhost:3000 — ElizaOS, plugin-keeperhub loaded</span></div>
-          <video id="v2" src="assets/video/b-wait1.mp4" muted data-start="10.7" data-duration="3.2" data-media-start="0"></video>
+          <video id="v2" src="assets/video/b-wait1.mp4" muted data-start="15.7" data-duration="3.2" data-media-start="0"></video>
         </div>
         <div class="badge">8&times; — local model thinking</div>
         <div class="caption">The model reads it. <em>It never touches a key.</em></div>
       </div>
 
       <!-- 4. THE PLAN -->
-      <div id="s4" class="clip" data-start="13.9" data-duration="6.2" data-track-index="3">
+      <div id="s4" class="clip" data-start="18.9" data-duration="6.2" data-track-index="3">
         <div class="stage">
           <div class="chrome"><i></i><i></i><i></i><span>localhost:3000 — KEEPERHUB_SIMULATE, dry run against the real chain</span></div>
-          <video id="v3" src="assets/video/c-plan.mp4" muted data-start="13.9" data-duration="6.0" data-media-start="0"></video>
+          <video id="v3" src="assets/video/c-plan.mp4" muted data-start="18.9" data-duration="6.0" data-media-start="0"></video>
         </div>
         <div id="s4c1" class="caption">KeeperHub dry runs it against the real chain.</div>
         <div id="s4c2" class="caption" style="opacity:0">The exact plan that would execute. <em>Nothing is queued unless it passes.</em></div>
       </div>
 
       <!-- 5. THE GATE -->
-      <div id="s5" class="clip center" data-start="19.9" data-duration="8.5" data-track-index="4">
+      <div id="s5" class="clip center" data-start="24.9" data-duration="8.5" data-track-index="4">
         <div id="s5a" class="huge">Nothing has moved.</div>
         <div id="s5b" class="rule"></div>
         <div id="s5c" class="mono-note">the dry run reached the chain; the transfer did not</div>
@@ -126,35 +133,35 @@
       </div>
 
       <!-- 6. APPROVAL -->
-      <div id="s6" class="clip" data-start="28.4" data-duration="2.0" data-track-index="5">
+      <div id="s6" class="clip" data-start="33.4" data-duration="2.0" data-track-index="5">
         <div class="stage">
           <div class="chrome"><i></i><i></i><i></i><span>localhost:3000 — one word, typed by a human</span></div>
-          <video id="v4" src="assets/video/d-confirm.mp4" muted data-start="28.4" data-duration="2.0" data-media-start="0"></video>
+          <video id="v4" src="assets/video/d-confirm.mp4" muted data-start="33.4" data-duration="2.0" data-media-start="0"></video>
         </div>
         <div class="caption">One word, typed by a human.</div>
       </div>
 
       <!-- 7. BROADCASTING -->
-      <div id="s7" class="clip" data-start="30.4" data-duration="4.13" data-track-index="6">
+      <div id="s7" class="clip" data-start="35.4" data-duration="4.13" data-track-index="6">
         <div class="stage">
           <div class="chrome"><i></i><i></i><i></i><span>localhost:3000 — KEEPERHUB_CONFIRM, replaying the stored payload</span></div>
-          <video id="v5" src="assets/video/e-wait2.mp4" muted data-start="30.4" data-duration="4.13" data-media-start="0"></video>
+          <video id="v5" src="assets/video/e-wait2.mp4" muted data-start="35.4" data-duration="4.13" data-media-start="0"></video>
         </div>
         <div class="badge">8&times; — broadcasting</div>
         <div class="caption">The stored payload is replayed byte for byte. <em>No argument is rebuilt.</em></div>
       </div>
 
       <!-- 8. RECEIPT -->
-      <div id="s8" class="clip" data-start="34.53" data-duration="5.9" data-track-index="7">
+      <div id="s8" class="clip" data-start="39.53" data-duration="5.9" data-track-index="7">
         <div class="stage">
           <div class="chrome"><i></i><i></i><i></i><span>localhost:3000 — the chain answered</span></div>
-          <video id="v6" src="assets/video/f-receipt.mp4" muted data-start="34.53" data-duration="5.9" data-media-start="0"></video>
+          <video id="v6" src="assets/video/f-receipt.mp4" muted data-start="39.53" data-duration="5.9" data-media-start="0"></video>
         </div>
         <div class="caption">The chain answers. <em>An execution id and a transaction hash.</em></div>
       </div>
 
       <!-- 9. THE KEY -->
-      <div id="s9" class="clip center" data-start="40.43" data-duration="7.97" data-track-index="8">
+      <div id="s9" class="clip center" data-start="45.43" data-duration="7.97" data-track-index="8">
         <div id="s9a" class="lead">The key that makes a retry safe is derived, never generated</div>
         <div id="s9b" class="card"><span class="k">task id     </span>27fe82a5-3fc8-4759-96dd-9d40a193ba4c
 <span class="k">derived key </span>3bd84fee005066247352615c0ed5538ce6775251044138c1e0f4ffa34ef9c50c
@@ -163,7 +170,7 @@
       </div>
 
       <!-- 10. ETHERSCAN -->
-      <div id="s10" class="clip" data-start="48.4" data-duration="12.0" data-track-index="9">
+      <div id="s10" class="clip" data-start="53.4" data-duration="12.0" data-track-index="9">
         <div class="stage">
           <div class="chrome"><i></i><i></i><i></i><span>sepolia.etherscan.io/tx/0x14c5929f9d39527345fbfb9e7852f85cfcd84313853a6cd68fcdd75a8fdf2bc6</span></div>
           <div style="height:800px;overflow:hidden"><img id="s10img" src="assets/images/etherscan.png" alt="Etherscan transaction details" style="transform-origin:50% 0%"/></div>
@@ -172,18 +179,44 @@
         <div id="s10c2" class="caption" style="opacity:0">0.001 ETH moved, as an internal transfer. <em>Not our word for it.</em></div>
       </div>
 
+      <!-- 10b. A REFUSAL, FROM THE SAME AGENT -->
+      <div id="r1" class="clip" data-start="65.4" data-duration="2.7" data-track-index="13">
+        <div class="stage">
+          <div class="chrome"><i></i><i></i><i></i><span>localhost:3000 — the same agent, a second request</span></div>
+          <video id="v8" src="assets/video/h1-ask.mp4" muted data-start="65.4" data-duration="2.7" data-media-start="0"></video>
+        </div>
+        <div class="caption">Now a request the model gets wrong.</div>
+      </div>
+
+      <div id="r2" class="clip" data-start="68.1" data-duration="3.0" data-track-index="14">
+        <div class="stage">
+          <div class="chrome"><i></i><i></i><i></i><span>localhost:3000 — KEEPERHUB_SIMULATE</span></div>
+          <video id="v9" src="assets/video/h2-wait.mp4" muted data-start="68.1" data-duration="3.06" data-media-start="0"></video>
+        </div>
+        <div class="badge">8&times; — local model thinking</div>
+        <div class="caption">It answers with an address that is not an address.</div>
+      </div>
+
+      <div id="r3" class="clip" data-start="71.1" data-duration="4.3" data-track-index="15">
+        <div class="stage">
+          <div class="chrome"><i></i><i></i><i></i><span>localhost:3000 — refused before any call</span></div>
+          <img id="r3img" src="assets/images/refusal.png" alt="The agent refusing a request it could not parse" />
+        </div>
+        <div class="caption">Rejected before anything was sent. <em>Nothing queued, nothing signed.</em></div>
+      </div>
+
       <!-- 11. THE SITE -->
-      <div id="s11" class="clip" data-start="60.4" data-duration="10.66" data-track-index="10">
+      <div id="s11" class="clip" data-start="75.4" data-duration="10.66" data-track-index="10">
         <div class="stage">
           <div class="chrome"><i></i><i></i><i></i><span>decodededan.github.io/plugin-keeperhub</span></div>
-          <video id="v7" src="assets/video/g-site.mp4" muted data-start="60.4" data-duration="10.66" data-media-start="0"></video>
+          <video id="v7" src="assets/video/g-site.mp4" muted data-start="75.4" data-duration="10.66" data-media-start="0"></video>
         </div>
         <div id="s11c1" class="caption">The published page runs the same gate.</div>
         <div id="s11c2" class="caption" style="opacity:0">Click once, and it stops exactly where the agent did.</div>
       </div>
 
       <!-- 12. PROVENANCE -->
-      <div id="s12" class="clip center" data-start="71.06" data-duration="8.44" data-track-index="11">
+      <div id="s12" class="clip center" data-start="86.06" data-duration="8.44" data-track-index="11">
         <div id="s12a" class="lead">Nothing on that page is typed by hand</div>
         <div id="s12b" class="card"><span class="k">terminal  </span>replayed from run.json, captured from this session
 <span class="k">receipt   </span>read from a public Sepolia node, not from KeeperHub
@@ -191,14 +224,14 @@
       </div>
 
       <!-- 13. INSTALL AND MARK -->
-      <div id="s13" class="clip center" data-start="79.5" data-duration="10.5" data-track-index="12">
+      <div id="s13" class="clip center" data-start="94.5" data-duration="10.5" data-track-index="12">
         <div id="s13a" class="install">npm install plugin-keeperhub</div>
         <div id="s13b" class="wordmark" style="margin-top:56px">The agent proposes. You approve.</div>
         <div id="s13c" class="pair">ElizaOS &times; KeeperHub</div>
       </div>
 
       <!-- AUDIO -->
-      <audio id="music" src="assets/audio/music.mp3" data-start="0" data-duration="90" data-volume="0.40"></audio>
+      <audio id="music" src="assets/audio/music.mp3" data-start="0" data-duration="105" data-volume="0.40"></audio>
     </div>
 
     <script>
@@ -214,51 +247,57 @@
       const rise = (sel, at, d = 0.5) =>
         tl.fromTo(sel, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: d, ease: "power2.out" }, at);
 
+      // 0 the stakes
+      rise("#s0a", 0.35, 0.6);
+      tl.fromTo("#s0b", { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.5, ease: "power2.out" }, 1.2);
+      fadeIn("#s0c", 1.7);
+      tl.to("#s0", { opacity: 0, duration: 0.4, ease: "power1.inOut" }, 4.7);
+
       // 1 title
-      rise("#s1a", 0.35);
-      fadeIn("#s1b", 0.9);
-      tl.fromTo("#s1c", { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.5, ease: "power2.out" }, 1.3);
-      tl.to("#s1", { opacity: 0, duration: 0.4, ease: "power1.inOut" }, 5.8);
+      rise("#s1a", 5.35);
+      fadeIn("#s1b", 5.9);
+      tl.fromTo("#s1c", { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.5, ease: "power2.out" }, 6.3);
+      tl.to("#s1", { opacity: 0, duration: 0.4, ease: "power1.inOut" }, 10.8);
 
       // 2-4, 6-8, 11 footage: fade the frame in, leave the recording untouched
-      [["#s2", 6.0], ["#s3", 10.7], ["#s4", 13.9], ["#s6", 28.4], ["#s7", 30.4], ["#s8", 34.53], ["#s11", 60.4]]
+      [["#s2", 11], ["#s3", 15.7], ["#s4", 18.9], ["#s6", 33.4], ["#s7", 35.4], ["#s8", 39.53], ["#s11", 75.4], ["#r1", 65.4], ["#r2", 68.1], ["#r3", 71.1]]
         .forEach(([sel, at]) => fadeIn(sel, at, 0.3));
 
       // 5 the gate
-      rise("#s5a", 20.2, 0.55);
-      tl.fromTo("#s5b", { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.5, ease: "power2.out" }, 20.8);
-      fadeIn("#s5c", 21.3);
-      tl.to("#s5", { opacity: 0, duration: 0.4, ease: "power1.inOut" }, 28.2);
+      rise("#s5a", 20.2, 5.55);
+      tl.fromTo("#s5b", { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.5, ease: "power2.out" }, 25.8);
+      fadeIn("#s5c", 26.3);
+      tl.to("#s5", { opacity: 0, duration: 0.4, ease: "power1.inOut" }, 33.2);
 
       // 9 the key
-      fadeIn("#s9a", 40.7);
-      rise("#s9b", 41.3, 0.5);
-      fadeIn("#s9c", 43.0);
-      tl.to("#s9", { opacity: 0, duration: 0.4, ease: "power1.inOut" }, 48.2);
+      fadeIn("#s9a", 45.7);
+      rise("#s9b", 41.3, 5.5);
+      fadeIn("#s9c", 48);
+      tl.to("#s9", { opacity: 0, duration: 0.4, ease: "power1.inOut" }, 53.2);
 
       // 10 explorer, drifting slowly so the eye can walk the rows
-      fadeIn("#s10", 48.4, 0.35);
-      tl.fromTo("#s10img", { y: 0 }, { y: -300, duration: 11.2, ease: "none" }, 48.7);
+      fadeIn("#s10", 48.4, 5.35);
+      tl.fromTo("#s10img", { y: 0 }, { y: -300, duration: 11.2, ease: "none" }, 53.7);
 
       // 12 provenance
-      fadeIn("#s12a", 71.4);
-      rise("#s12b", 72.0, 0.5);
-      tl.to("#s12", { opacity: 0, duration: 0.4, ease: "power1.inOut" }, 79.3);
+      fadeIn("#s12a", 86.4);
+      rise("#s12b", 72.0, 5.5);
+      tl.to("#s12", { opacity: 0, duration: 0.4, ease: "power1.inOut" }, 94.3);
 
       // caption beats: the second line lands once the first has been read
       const swap = (a, b, at) => {
         tl.to(a, { opacity: 0, duration: 0.3, ease: "power1.inOut" }, at);
         tl.fromTo(b, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power1.inOut" }, at + 0.25);
       };
-      swap("#s4c1", "#s4c2", 16.6);
-      swap("#s10c1", "#s10c2", 54.4);
-      swap("#s11c1", "#s11c2", 65.9);
-      fadeIn("#s5d", 23.4);
+      swap("#s4c1", "#s4c2", 21.6);
+      swap("#s10c1", "#s10c2", 59.4);
+      swap("#s11c1", "#s11c2", 80.9);
+      fadeIn("#s5d", 28.4);
 
       // 13 install and mark
-      rise("#s13a", 79.8, 0.5);
-      fadeIn("#s13b", 81.0);
-      fadeIn("#s13c", 81.9);
+      rise("#s13a", 79.8, 5.5);
+      fadeIn("#s13b", 96);
+      fadeIn("#s13c", 96.9);
 
       window.__timelines = window.__timelines || {};
       window.__timelines["main"] = tl;
