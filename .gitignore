@@ -1,3 +1,15 @@
 node_modules/
 dist/
 .env
+
+.DS_Store
+
+# brag video: keep the deliverables, ignore the build artifacts
+brag-output/composition/node_modules/
+brag-output/composition/renders/
+brag-output/composition/.hyperframes/
+
+# Third-party audio bundled with the /brag skill. Its own README says the
+# licence terms must be verified before redistribution, and they have not
+# been. The rendered video ships; the raw source tracks do not.
+brag-output/composition/assets/audio/

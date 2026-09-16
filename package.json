@@ -18,14 +18,23 @@
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "npm run type-check && npm run test && npm run build"
   },
   "keywords": [
     "elizaos",
+    "eliza",
     "plugin",
     "keeperhub",
     "web3",
-    "agent"
+    "agent",
+    "ai-agent",
+    "onchain",
+    "ethereum",
+    "evm",
+    "human-in-the-loop",
+    "dry-run",
+    "idempotency"
   ],
   "license": "MIT",
   "dependencies": {
@@ -63,5 +72,20 @@
         "default": "11155111"
       }
     }
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "okwareddevnest",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/okwareddevnest/plugin-keeperhub.git"
+  },
+  "homepage": "https://okwareddevnest.github.io/plugin-keeperhub/",
+  "bugs": {
+    "url": "https://github.com/okwareddevnest/plugin-keeperhub/issues"
   }
 }

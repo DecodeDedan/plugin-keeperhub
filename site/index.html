@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>plugin-keeperhub — the agent proposes, you approve</title>
+<meta name="description" content="An ElizaOS plugin that dry runs every onchain transfer, shows you the exact plan, and executes only that — byte for byte." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root{
+  /* Ledger paper: the artifact for recording value movements that must be correct. */
+  --ledger:#eef1ea;
+  --paper:#fdfdfb;
+  --ink:#18211d;
+  --rule:#ccd5c9;
+  --muted:#5c6b62;
+  --verified:#1a7f45;
+  --pending:#b0810f;
+  --void:#a8291b;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --col:min(1080px,100% - 3rem);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--ledger);color:var(--ink);
+  font-family:var(--sans);font-size:17px;line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{width:var(--col);margin-inline:auto}
+a{color:var(--ink);text-underline-offset:3px;text-decoration-thickness:1px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--pending);outline-offset:3px;border-radius:3px}
+
+/* ---- masthead ---- */
+.masthead{display:flex;align-items:baseline;justify-content:space-between;gap:1.5rem;
+  padding:1.6rem 0 1.4rem;flex-wrap:wrap}
+.mark{font-family:var(--mono);font-weight:600;font-size:1.02rem;letter-spacing:-.01em}
+.meta{display:flex;gap:1.4rem;font-size:.9rem;color:var(--muted)}
+
+/* ---- hero ---- */
+.hero{padding:3.2rem 0 1rem;border-top:1px solid var(--rule)}
+h1{text-wrap:balance;
+  font-family:var(--mono);font-weight:500;
+  font-size:clamp(1.9rem,4.6vw,3.35rem);line-height:1.16;letter-spacing:-.035em;
+  margin:0 0 1.15rem;max-width:20ch;
+}
+.standfirst{max-width:56ch;font-size:1.12rem;color:var(--muted);margin:0 0 2.4rem}
+
+/* ---- terminal ---- */
+.term{
+  background:var(--paper);border:1px solid var(--rule);border-radius:10px;
+  font-family:var(--mono);font-size:.94rem;line-height:1.75;
+  padding:1.3rem 1.5rem;overflow-x:auto;
+}
+.term pre{margin:0;font:inherit;white-space:pre}
+.prompt{color:var(--muted)}
+.ok{color:var(--verified)}
+.warn{color:var(--pending)}
+.no{color:var(--void)}
+.caret{display:inline-block;width:.55em;height:1.05em;background:var(--ink);
+  vertical-align:-.17em;animation:blink 1.06s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+.stage{display:grid;gap:.85rem}
+.controls{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
+button{
+  font:inherit;font-family:var(--mono);font-size:.9rem;
+  background:var(--ink);color:var(--paper);border:1px solid var(--ink);
+  padding:.62rem 1.15rem;border-radius:7px;cursor:pointer;
+}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+button.go{background:var(--verified);border-color:var(--verified)}
+button[disabled]{opacity:.35;cursor:not-allowed}
+.hint{font-size:.87rem;color:var(--muted)}
+.hint strong{font-weight:500;color:var(--ink)}
+
+/* ---- sections ---- */
+section{padding:4.2rem 0;border-top:1px solid var(--rule)}
+h2{font-size:1.5rem;font-weight:600;letter-spacing:-.018em;margin:0 0 1.1rem;max-width:44ch;text-wrap:balance}
+p{max-width:66ch;margin:0 0 1.05rem}
+.lede{font-size:1.06rem}
+
+/* ---- ledger table: ruled rows, not identical cards ---- */
+.ledger{width:100%;border-collapse:collapse;margin-top:.4rem;font-size:.96rem}
+.ledger td{padding:.85rem 0;border-top:1px solid var(--rule);vertical-align:top}
+.ledger tr:last-child td{border-bottom:1px solid var(--rule)}
+.ledger td:first-child{font-family:var(--mono);font-size:.88rem;white-space:nowrap;
+  padding-right:2rem;width:1%}
+.ledger td:last-child{color:var(--muted)}
+
+.pairs{width:100%;border-collapse:collapse;font-size:.93rem;margin-top:.6rem}
+.pairs td{padding:.72rem 0;border-top:1px solid var(--rule);vertical-align:top}
+.pairs td:first-child{width:38%;padding-right:1.6rem;color:var(--muted)}
+
+.receipt{background:var(--paper);border:1px solid var(--rule);border-radius:10px;
+  padding:1.3rem 1.5rem;font-family:var(--mono);font-size:.88rem;line-height:1.8;overflow-x:auto}
+.receipt a{color:var(--verified)}
+
+.install{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+  background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:1.1rem 1.4rem}
+.install code{font-family:var(--mono);font-size:1rem}
+
+footer{padding:3rem 0 4rem;border-top:1px solid var(--rule);color:var(--muted);font-size:.9rem}
+footer p{max-width:60ch}
+
+@media (prefers-reduced-motion:reduce){
+  .caret{animation:none}
+  *{transition:none!important}
+}
+@media (max-width:620px){
+  body{font-size:16px}
+  .term{font-size:.8rem;padding:1rem 1.1rem}
+  .receipt{font-size:.76rem}
+  /* Action names are single unbroken tokens wide enough to force a minimum
+     table width past the column. Stack the rows so each gets a full line. */
+  .ledger td,.pairs td{display:block;width:auto;padding-right:0}
+  .ledger td:first-child{white-space:normal;overflow-wrap:anywhere;
+    padding-bottom:.2rem;border-top:1px solid var(--rule)}
+  .ledger td:last-child{padding-top:0;border-top:0;padding-bottom:1rem}
+  .pairs td:first-child{width:auto;padding-bottom:.15rem;border-top:1px solid var(--rule)}
+  .pairs td:last-child{padding-top:0;border-top:0;padding-bottom:1rem}
+  .ledger tr:last-child td:last-child,.pairs tr:last-child td:last-child{border-bottom:1px solid var(--rule)}
+}
+</style>
+</head>
+<body>
+
+<header class="wrap masthead">
+  <span class="mark">plugin-keeperhub</span>
+  <span class="meta">
+    <a href="https://www.npmjs.com/package/plugin-keeperhub">npm</a>
+    <a href="https://github.com/okwareddevnest/plugin-keeperhub">source</a>
+    <span>ElizaOS plugin</span>
+    <span>MIT</span>
+  </span>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <h1>Your agent is about to move money.</h1>
+    <p class="standfirst">
+      It decides exactly what that means at the moment it happens, and by the time you can see
+      the decision it is already on chain. This plugin puts one step in between.
+    </p>
+
+    <div class="stage">
+      <div class="term" id="term" aria-live="polite" aria-atomic="false"><pre id="out"><span class="prompt">you</span>
+send 0.05 ETH to 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238<span class="caret" id="caret"></span></pre></div>
+      <div class="controls" id="controls">
+        <button id="run">Ask the agent</button>
+        <span class="hint" id="hint">Real output from a live run. Nothing here touches a chain.</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="wrap">
+    <h2>An agent that is right 99% of the time drains a treasury on its hundredth transfer</h2>
+    <p class="lede">
+      The model is not the problem. Being asked to be exact, once, with no second look, on the
+      one operation that cannot be undone is.
+    </p>
+    <p>
+      A confirmation prompt does not fix this. It confirms an intent, not a transaction. A
+      spending cap bounds the damage rather than preventing the mistake. Asking the model to
+      restate its plan just asks a probabilistic system to describe itself.
+    </p>
+    <p>
+      So the model contributes exactly once, before anything is reviewable, and what it produced
+      is shown to a person before it can move value. On approval the stored payload is replayed
+      byte for byte. Nothing is inferred at execution time, because by then there is nothing left
+      to infer.
+    </p>
+  </section>
+
+  <section class="wrap">
+    <h2>What gets installed</h2>
+    <table class="ledger">
+      <tbody>
+        <tr><td>KEEPERHUB_WALLET</td><td>A provider that puts the real wallet, the enforced daily cap, and the remaining headroom into the agent's context, so it reasons against limits that exist.</td></tr>
+        <tr><td>KEEPERHUB_SIMULATE</td><td>Dry runs a token transfer. Has no code path that broadcasts.</td></tr>
+        <tr><td>KEEPERHUB_SIMULATE_CALL</td><td>Dry runs a contract call, including payable functions.</td></tr>
+        <tr><td>KEEPERHUB_SIMULATE_CONDITIONAL</td><td>Dry runs a conditional action: read one value, act only if a comparison holds.</td></tr>
+        <tr><td>KEEPERHUB_CONFIRM</td><td>Replays the reviewed plan. Has no code path that constructs arguments.</td></tr>
+        <tr><td>KEEPERHUB_STATUS</td><td>Reads back whether a broadcast settled, because <em>unconfirmed</em> is a real outcome and the answer to it is to poll, never to re-send.</td></tr>
+        <tr><td>KEEPERHUB_RECORD_EXECUTION</td><td>An evaluator that writes each execution into agent memory.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="wrap">
+    <h2>The idempotency key is derived, never generated</h2>
+    <p>
+      A key minted per attempt does not survive a retry: the second attempt sends a different
+      key, KeeperHub treats the request as new work, and the transfer executes twice. So a task
+      id is minted once when the dry run queues the plan, and the key is a SHA-256 of that id
+      joined with the fields that decide the onchain effect — chain aliases resolved, addresses
+      lowercased, amounts normalised.
+    </p>
+    <p>
+      Every attempt at one plan sends one key. A fresh dry run is different work and gets a
+      different one. That property is what makes the retry rule safe: keep the plan when nothing
+      definite is known, discard it once an outcome is settled.
+    </p>
+  </section>
+
+  <section class="wrap">
+    <h2>It survives the paths that are not the happy one</h2>
+    <table class="pairs">
+      <tbody>
+        <tr><td>Model mangles an address</td><td>Rejected before any call. Nothing queued.</td></tr>
+        <tr><td>Dry run says it would revert</td><td>Nothing queued, with the decoded reason.</td></tr>
+        <tr><td>Simulator cannot reach the chain</td><td>Reported as unavailable, explicitly not as a revert — nothing was learned either way.</td></tr>
+        <tr><td>Broadcast returns unconfirmed</td><td>Reported as in flight, never as success or failure. Calling a live transaction failed is what provokes a double spend.</td></tr>
+        <tr><td>Broadcast times out</td><td>Plan kept. Confirming again derives the same key and replays.</td></tr>
+        <tr><td>User replies ambiguously</td><td>Approval must be unmistakable. Nothing broadcasts.</td></tr>
+        <tr><td>User approves twice</td><td>The plan is consumed on the first take.</td></tr>
+        <tr><td>Solana chain</td><td>Refused before any call. The dry run is EVM-only, and this will not broadcast what it could not preview.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="wrap">
+    <h2>A real receipt</h2>
+    <p>Executed against production KeeperHub on Ethereum Sepolia. The hash resolves.</p>
+    <div class="receipt">execution    qwkk13npsccznblf3m6gr
+transaction  <a href="https://sepolia.etherscan.io/tx/0x5b537ffae10324d3b9e620c5b9647f51f24787b23b293d5097b75c5d3d5a048b">0x5b537ffae10324d3b9e620c5b9647f51f24787b23b293d5097b75c5d3d5a048b</a>
+block        11712998
+receipt      <span class="ok">success, verified</span>
+gas used     74781</div>
+  </section>
+
+  <section class="wrap">
+    <h2>Install</h2>
+    <div class="install"><code>npm install plugin-keeperhub</code></div>
+    <p style="margin-top:1.4rem">Add it to your character and give it an organisation API key:</p>
+    <div class="term"><pre>{
+  "plugins": ["plugin-keeperhub"],
+  "settings": {
+    "secrets": { "KEEPERHUB_API_KEY": "kh_..." }
+  }
+}</pre></div>
+    <p style="margin-top:1.4rem">
+      The default chain is Ethereum Sepolia, on purpose. Point it at mainnet deliberately, never
+      by forgetting to. A key scoped <code>mcp:read</code> can dry run but is refused on
+      broadcast; broadcasting needs <code>mcp:write</code> or <code>mcp:admin</code>.
+    </p>
+  </section>
+</main>
+
+<footer class="wrap">
+  <p>
+    123 tests, 7 files. 117 run with no credentials and no network; the rest run against a live
+    organisation and are reads or dry runs only. The safety properties are mutation tested —
+    each one is broken on purpose to confirm the suite catches it.
+  </p>
+  <p style="margin-top:1rem">MIT licensed. Built for ElizaOS.</p>
+</footer>
+
+<script>
+(function(){
+  var out = document.getElementById("out");
+  var run = document.getElementById("run");
+  var hint = document.getElementById("hint");
+  var controls = document.getElementById("controls");
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var PLAN =
+    '<span class="prompt">you</span>\n' +
+    'send 0.05 ETH to 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238\n\n' +
+    'Dry run complete. This is the exact plan that would execute:\n' +
+    '  move         0.001 (native token)\n' +
+    '  to           0x67f10576d6333FFA439EB1d4293BB6C9f019F138\n' +
+    '  chain        11155111\n' +
+    '  gas estimate 21227\n\n' +
+    '<span class="warn">Nothing has moved.</span> Approve to execute exactly this.';
+
+  var DONE =
+    '<span class="prompt">you</span>\nconfirm\n\n' +
+    'Executed the plan you approved. The chain confirmed it.\n' +
+    '  execution    qwkk13npsccznblf3m6gr\n' +
+    '  transaction  0x5b537ffae10324d3b9e620c5b9647f51f24787b23b293d5097b75c5d3d5a048b\n' +
+    '  receipt      <span class="ok">success, verified</span>';
+
+  var DISCARDED =
+    '<span class="prompt">you</span>\n' +
+    'send 0.05 ETH to 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238\n\n' +
+    '<span class="no">Discarded.</span> The plan is gone and nothing was sent.\n' +
+    'Ask again and it will dry run from scratch.';
+
+  // Reveal on a whole-line cadence: a character-by-character crawl would make
+  // the one block a visitor actually needs to read the slowest thing here.
+  function reveal(html, done){
+    if (reduced) { out.innerHTML = html; if (done) done(); return; }
+    var lines = html.split("\n");
+    var i = 0;
+    out.innerHTML = "";
+    (function step(){
+      out.innerHTML = lines.slice(0, ++i).join("\n") + (i < lines.length ? '<span class="caret"></span>' : "");
+      if (i < lines.length) { setTimeout(step, 95); } else if (done) { done(); }
+    })();
+  }
+
+  function setControls(html){ controls.innerHTML = html; }
+
+  run.addEventListener("click", function(){
+    run.disabled = true;
+    hint.textContent = "Running the dry run. Nothing is signed or broadcast.";
+    reveal(PLAN, function(){
+      setControls(
+        '<button class="go" id="approve">Approve</button>' +
+        '<button class="ghost" id="discard">Discard</button>' +
+        '<span class="hint"><strong>This is the gate.</strong> The page stops here until you decide.</span>'
+      );
+      document.getElementById("approve").addEventListener("click", function(){
+        reveal(DONE, function(){
+          setControls('<span class="hint">That hash is real. It is the same transaction linked further down this page.</span>');
+        });
+      });
+      document.getElementById("discard").addEventListener("click", function(){
+        reveal(DISCARDED, function(){
+          setControls('<button id="again">Ask the agent</button><span class="hint">Nothing was sent.</span>');
+          document.getElementById("again").addEventListener("click", function(){ location.reload(); });
+        });
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

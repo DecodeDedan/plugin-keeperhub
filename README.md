@@ -2,65 +2,159 @@
 
 Deterministic onchain execution for ElizaOS agents.
 
-An Eliza agent that moves funds today builds and signs a transaction inline, which means a
-language model decides what happens at the exact moment it matters most. This plugin removes
-that. The agent composes and dry runs a plan through KeeperHub, a human reviews it, and then
-that plan executes byte for byte. Nothing is inferred at execution time.
+## The problem
+
+Agents are probabilistic by design. That is the property that makes them useful, and it is
+the property onchain value transfer does not forgive.
+
+An ElizaOS agent that moves funds today builds and signs the transaction inline. The model
+decides the recipient, the amount, and the moment, and it decides them *at the moment of
+execution*. There is no point at which a human sees what is about to happen while it is still
+about to happen. By the time anything is observable, it is on chain and irreversible.
+
+The failure mode is not that the model is bad. It is that the model is asked to be exact,
+once, with no second look, on the one operation that cannot be undone. A model that is right
+99% of the time is a model that drains a treasury on its hundredth transfer.
+
+The usual mitigations do not close this. A confirmation prompt that asks "are you sure?"
+confirms an intent, not a transaction. A spending cap bounds the damage rather than preventing
+the mistake. Re-asking the model to restate the plan just asks a probabilistic system to
+describe itself, which is not the same as binding it.
+
+## What this brings
+
+KeeperHub becomes the execution layer, and the model is removed from the moment of execution
+entirely.
+
+The agent composes an action and KeeperHub dry runs it without touching the chain. The human
+reads the exact plan that would execute. On approval, KeeperHub broadcasts **that** plan,
+byte for byte. Nothing is inferred at execution time, because by execution time there is
+nothing left to infer.
+
+The model contributes exactly once, before anything is reviewable, and what it produced is
+shown to a person before it can move value.
 
 ## How it works
 
-Three components, and the split between the two actions is the whole design.
+```mermaid
+flowchart TD
+    msg["User: send 0.05 ETH to 0x1c7D..."]
 
-**`KEEPERHUB_WALLET` provider** injects the agent's real wallet, its enforced daily spending
-caps and usage so far into context on every composition. The agent reasons against limits that
-actually exist instead of ones it imagined.
+    subgraph phase1["The model may influence everything in here"]
+        direction TB
+        llm["Model extracts<br/>address, amount, chain"]
+        validate{"Shape valid?"}
+        refuse1["Refuse.<br/>Nothing queued."]
+        dryrun["KeeperHub dry run<br/>simulate: true"]
+        clean{"Clean pass?"}
+        refuse2["Report the real reason.<br/>Nothing queued."]
+        store[("Plan stored verbatim<br/>task id minted")]
+        llm --> validate
+        validate -->|"negative amount<br/>mangled address<br/>not JSON"| refuse1
+        validate -->|yes| dryrun
+        dryrun --> clean
+        clean -->|"would revert<br/>simulator unavailable<br/>insufficient balance"| refuse2
+        clean -->|yes| store
+    end
 
-**`KEEPERHUB_SIMULATE` action** fires on any request to move value. It extracts the intent,
-validates the shape, calls KeeperHub with `simulate: true`, and posts the resulting plan back
-into the room. It has no code path that broadcasts. It structurally cannot spend money.
+    human>"Human reads the exact plan"]
 
-**`KEEPERHUB_SIMULATE_CALL` action** does the same for smart contract function calls, including
-payable ones.
+    subgraph phase2["The model cannot reach anything in here"]
+        direction TB
+        confirm["Replay stored bytes<br/>drop simulate<br/>attach derived key"]
+        broadcast["KeeperHub signs and broadcasts"]
+        receipt["Receipt re-fetched from chain"]
+        confirm --> broadcast
+        broadcast --> receipt
+    end
 
-**`KEEPERHUB_SIMULATE_CONDITIONAL` action** does the same for conditional execution: read one
-scalar from a contract, and call a function only if a comparison holds.
+    msg --> llm
+    store --> human
+    human -->|"explicit approval only"| confirm
 
-All three share one dry-run path, so the rule that nothing reaches the plan store unless
-KeeperHub returned an unambiguous success cannot drift between them.
+    classDef step fill:#ffffff,stroke:#57606a,stroke-width:1px,color:#1f2328
+    classDef gate fill:#f6f8fa,stroke:#57606a,stroke-width:1px,color:#1f2328
+    classDef stop fill:#fdeded,stroke:#b42318,stroke-width:1px,color:#1f2328
+    classDef good fill:#e8f5ec,stroke:#1a7f45,stroke-width:1px,color:#1f2328
 
-**`KEEPERHUB_STATUS` action** reads back whether a broadcast execution has settled. It exists
-because `unconfirmed` is a real outcome and the correct response to it is to poll, never to
-re-send.
+    class msg,llm,dryrun,confirm,broadcast step
+    class validate,clean gate
+    class refuse1,refuse2 stop
+    class store step
+    class human,receipt good
 
-**`KEEPERHUB_CONFIRM` action** validates only when a plan is pending for that room and the
-human wrote something unmistakably affirmative. It replays the stored argument payload
-verbatim, dropping `simulate` and attaching the plan's idempotency key. It has no code path
-that constructs arguments. It structurally cannot invent a transfer.
-
-The key is **derived from the plan, never generated per attempt**. KeeperHub documents why:
-a per-attempt UUID does not survive a retry, so the second attempt is treated as new work and
-executes again. A task id is minted once when the dry run queues the plan, and the key is the
-SHA-256 of a canonical join of that id with the fields that decide the onchain effect, with
-chain aliases resolved, addresses lowercased and amounts normalised to a decimal string. Every
-attempt at one plan sends one key; a fresh dry run is different work and gets a different one.
-
-**`KEEPERHUB_RECORD_EXECUTION` evaluator** writes each execution into agent memory, so the
-agent can answer what it did without the human re-reading scrollback.
-
+    style phase1 fill:#fdf6e3,stroke:#b8860b,color:#1f2328
+    style phase2 fill:#eef3f8,stroke:#3d6e99,color:#1f2328
 ```
-user asks -> SIMULATE / SIMULATE_CALL (dry run, no chain)
-          -> human reads plan
-          -> "confirm"
-          -> CONFIRM (exact replay)
+
+The boundary between the two shaded regions is the whole design, and it is structural rather
+than procedural:
+
+- A simulate action has **no code path that broadcasts**. It cannot spend money.
+- `KEEPERHUB_CONFIRM` has **no code path that constructs arguments**. It cannot invent a
+  transfer. It reads `plan.args` and sends them.
+
+Neither is a rule someone has to remember. Each is the absence of a branch.
+
+## The components
+
+Three kinds of extension, which is what makes this specific to ElizaOS rather than a wrapper
+around an HTTP call.
+
+**`KEEPERHUB_WALLET` provider** injects the agent's real wallet, the daily cap that is
+actually enforced, and how much of it is left, into context on every composition. The agent
+reasons against limits that exist instead of ones it imagined, so a plan that cannot clear
+policy is never proposed.
+
+**Three simulate actions** cover transfers, contract calls, and conditional execution. All
+three share one dry-run path, so the rule that nothing is queued unless KeeperHub returned an
+unambiguous success cannot drift between them.
+
+**`KEEPERHUB_CONFIRM`** replays the reviewed plan. It stores which tool it is replaying, so
+one approval path serves every kind of action.
+
+**`KEEPERHUB_STATUS`** reads back whether a broadcast has settled, because `unconfirmed` is a
+real outcome and the correct response to it is to poll, never to re-send.
+
+**`KEEPERHUB_RECORD_EXECUTION` evaluator** writes each execution into agent memory.
+
+## The idempotency key
+
+The key is derived from the plan, never generated per attempt. This is worth stating on its
+own because getting it wrong is silent and expensive, and the first version of this plugin got
+it wrong.
+
+A UUID minted per attempt does not survive a retry: the second attempt sends a different key,
+KeeperHub treats the request as new work, and the transfer executes twice. So a task id is
+minted once when the dry run queues the plan, and the key is the SHA-256 of a canonical join
+of that id with the fields that decide the onchain effect, with chain aliases resolved to
+decimal, addresses lowercased, and amounts normalised to a plain decimal string.
+
+Every attempt at one plan sends one key. A fresh dry run is different work and gets a
+different one, so two deliberate identical transfers do not collide inside the replay window.
+
+That property is what makes the retry rule safe:
+
+```mermaid
+flowchart TD
+    b["Broadcast returns"] --> q{"Is the outcome definite?"}
+    q -->|"completed, failed,<br/>idempotency_conflict"| discard["Discard the plan.<br/>A later attempt is new work."]
+    q -->|"timeout, 5xx,<br/>idempotency_in_progress"| keep["Keep the plan.<br/>A retry derives the SAME key,<br/>so KeeperHub replays<br/>instead of sending again."]
+
+    classDef step fill:#ffffff,stroke:#57606a,stroke-width:1px,color:#1f2328
+    classDef gate fill:#f6f8fa,stroke:#57606a,stroke-width:1px,color:#1f2328
+    classDef good fill:#e8f5ec,stroke:#1a7f45,stroke-width:1px,color:#1f2328
+    classDef cool fill:#eef3f8,stroke:#3d6e99,stroke-width:1px,color:#1f2328
+
+    class b step
+    class q gate
+    class discard cool
+    class keep good
 ```
 
-Confirm stores which tool it is replaying, so it is agnostic to what was queued. A transfer and
-a contract call share one approval path.
-
-The model contributes to the payload exactly once, during simulate, and everything it produced
-is shown to a human before it can move value. On approval the stored bytes are replayed. A
-design that re-derives arguments at confirm time would put the model back in the loop at the
-one moment the human already signed off on something specific.
+Rotating the key after a timeout is what turns one intent into two transactions. Keeping a
+plan after a definite failure makes a dead key replay that failure for 24 hours. Both
+directions are wrong, and which one applies depends only on whether anything is known.
 
 ## Install
 
@@ -68,29 +162,25 @@ one moment the human already signed off on something specific.
 npm install plugin-keeperhub
 ```
 
-Add to your character file:
-
 ```json
 {
   "plugins": ["plugin-keeperhub"],
   "settings": {
-    "secrets": {
-      "KEEPERHUB_API_KEY": "kh_..."
-    }
+    "secrets": { "KEEPERHUB_API_KEY": "kh_..." }
   }
 }
 ```
 
 | Setting | Required | Default | Purpose |
 |---|---|---|---|
-| `KEEPERHUB_API_KEY` | yes | — | Organization API key from KeeperHub settings |
+| `KEEPERHUB_API_KEY` | yes | — | Organization API key. Needs `mcp:write` or `mcp:admin` to broadcast; a `mcp:read` key can dry run only. |
 | `KEEPERHUB_MCP_URL` | no | `https://app.keeperhub.com/mcp` | MCP endpoint |
 | `KEEPERHUB_DEFAULT_CHAIN_ID` | no | `11155111` (Sepolia) | Chain used when the user names none |
 
-The default is a testnet on purpose. Point it at mainnet deliberately, never by forgetting to.
+The default is a testnet deliberately. Point it at mainnet on purpose, never by forgetting to.
 
-Missing configuration is not fatal: the provider reports that execution is unavailable and both
-actions refuse, so an agent that also does other things keeps working.
+Missing configuration is not fatal: the provider reports that execution is unavailable and
+every action refuses, so an agent that also does other things keeps working.
 
 ## Behaviour outside the happy path
 
@@ -98,26 +188,24 @@ actions refuse, so an agent that also does other things keeps working.
 |---|---|
 | KeeperHub unreachable | Provider degrades to a notice; actions refuse. Context composition never throws. |
 | Model returns a negative, zero, exponent or numeric amount | Rejected before any call. Nothing queued. |
-| Model emits `function_args` as an array rather than the encoded string KeeperHub wants | Normalised once, before the dry run, so the plan stores the wire form and confirm replays it unchanged. |
-| Model invents a function name that is not a Solidity identifier | Rejected before any call. Nothing queued. |
 | Model truncates or mangles an address | Rejected before any call. Nothing queued. |
+| Model emits `function_args` as an array rather than the encoded string KeeperHub wants | Normalised once, before the dry run, so the plan stores the wire form and confirm replays it unchanged. |
 | Dry run says the call would revert | Nothing queued. Reported as a revert, with the decoded reason. |
 | Simulator cannot reach the chain | Nothing queued. Reported as unavailable, explicitly not as a revert, because nothing was learned either way. |
 | Dry run fails on balance | Nothing queued. Reports balance, requirement and exact shortfall. |
 | KeeperHub answers in an unrecognised shape | Nothing queued. Guards reject rather than cast. |
-| Broadcast returns `unconfirmed` | Reported as in flight, never as success or failure. The agent is told to poll, not re-send, because reporting a live transaction as failed is what provokes a double spend. |
-| Broadcast times out or returns 5xx | No definite outcome, so the plan is kept. Confirming again derives the same key and replays rather than sending a second transaction. Rotating the key here is what turns one intent into two transfers. |
-| `idempotency_in_progress` | The first attempt is still running. Plan kept, same key on retry, nothing sent twice. |
-| `idempotency_conflict` | Definite; retrying cannot help. Plan discarded, and the original execution id is surfaced. |
-| Response carries `idempotentReplay` | Named as a replay, so a stored failure is not mistaken for a fresh one. |
-| Key scoped `mcp:read` only | Named as a scope refusal with the scope needed, not a generic failure. |
 | View or pure call | Returns its value. Nothing queued, because there is nothing to broadcast. |
-| Conditional whose condition does not hold | Reports the observed and required values. Nothing queued. |
-| Solana chain (101, 103) | Refused before any call. Dry run is EVM-only, and this plugin will not broadcast what it could not preview. |
+| Conditional whose condition does not hold | Reports observed and required values. Nothing queued. |
+| Solana chain (101, 103) | Refused before any call. The dry run is EVM-only, and this plugin will not broadcast what it could not preview. |
 | User replies ambiguously | `validate` returns false. No broadcast. |
 | User approves twice | The plan is consumed on first take. The second finds nothing. |
 | Approval arrives 10+ minutes late | Plan expired. The human re-runs the dry run against current state. |
-| Broadcast fails | Reported, plan discarded, nothing left replayable. |
+| Broadcast returns `unconfirmed` | Reported as in flight, never as success or failure, because reporting a live transaction as failed is what provokes a double spend. |
+| Broadcast times out or returns 5xx | Plan kept. Confirming again derives the same key and replays. |
+| `idempotency_in_progress` | Plan kept, same key on retry, nothing sent twice. |
+| `idempotency_conflict` | Plan discarded; the original execution id is surfaced. |
+| Response carries `idempotentReplay` | Named as a replay, so a stored failure is not mistaken for a fresh one. |
+| Key scoped `mcp:read` only | Named as a scope refusal with the scope needed, not a generic failure. |
 | Agent restarts mid-approval | Plan lost, which fails toward a repeated dry run rather than a surprise transfer. |
 
 ## Development
@@ -129,28 +217,24 @@ pnpm test
 pnpm build
 ```
 
-Seventy tests run with no credentials and no network: the MCP client is a recording double and
-the model is stubbed, so each test asserts on exactly what would have reached the chain.
-Response fixtures in `test/fixtures.ts` are transcribed from KeeperHub source, not from a
-response seen once.
+**123 tests across 7 files.** 117 run with no credentials and no network: the MCP client is a
+recording double and the model is stubbed, so each test asserts on exactly what would have
+reached the chain. Response fixtures in `test/fixtures.ts` are transcribed from KeeperHub
+source, and one is a real production response captured verbatim.
 
-Four further tests run against a real KeeperHub organization when credentials are present, and
-skip otherwise:
-
-```bash
-KEEPERHUB_API_KEY=kh_... pnpm test
-```
-
-They verify the live contract that no double can: that KeeperHub still answers in the shapes
+The remaining 6 run against a live KeeperHub organization when `KEEPERHUB_API_KEY` is present
+and skip otherwise. They verify what no double can: that KeeperHub still answers in the shapes
 the guards parse. Every call in that file is a read or a `simulate: true` dry run, so no value
 moves; the file contains no broadcast path at all.
 
 The safety properties are mutation tested. Each of these breaks, and each is caught:
-re-deriving an argument on the broadcast path, generating the idempotency key per attempt
-instead of per plan, rotating the plan away after an ambiguous outcome, reporting an
-unreachable simulator as a revert, reporting an unconfirmed broadcast as settled, dropping the
-Solana guard, weakening amount canonicalization, leaving the task-id separator unescaped, and
-weakening a response guard to accept any shape.
+re-deriving an argument on the broadcast path, generating the idempotency key per attempt,
+rotating the plan away after an ambiguous outcome, reporting an unreachable simulator as a
+revert, reporting an unconfirmed broadcast as settled, dropping the Solana guard, weakening
+amount canonicalization, leaving the task-id separator unescaped, and weakening a response
+guard to accept any shape.
+
+See [DEMO.md](./DEMO.md) to run it.
 
 ## License
 
