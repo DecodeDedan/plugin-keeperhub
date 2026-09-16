@@ -1,0 +1,13 @@
+AI agents are probabilistic. Onchain transfers do not forgive that.
+
+plugin-keeperhub makes an ElizaOS agent dry run every transfer, show you the exact plan, and
+execute only that -- byte for byte. The model contributes once, before anything is reviewable.
+By the time it broadcasts, there is nothing left to infer.
+
+Real receipt, Ethereum Sepolia, verified on chain:
+https://sepolia.etherscan.io/tx/0x5b537ffae10324d3b9e620c5b9647f51f24787b23b293d5097b75c5d3d5a048b
+
+Run the gate yourself, no wallet, nothing touches a chain:
+https://decodededan.github.io/plugin-keeperhub/
+
+ElizaOS x KeeperHub

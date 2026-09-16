@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px; height: 1080px; overflow: hidden;
+        background: #fbfbfa;
+      }
+      #root {
+        width: 100%; height: 100%; position: relative;
+        background: #fbfbfa;
+        font-family: Inter, "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+        color: #1f2328;
+      }
+      .clip { position: absolute; inset: 0; }
+
+      .center { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+      /* A terminal rendered light on purpose: the subject is clarity, not mystique. */
+      .term {
+        width: 1180px; padding: 44px 52px;
+        background: #ffffff; border: 1px solid #e6e6e3; border-radius: 14px;
+        box-shadow: 0 18px 48px rgba(31, 35, 40, 0.07);
+        font-family: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace;
+        font-size: 30px; line-height: 1.62; color: #1f2328;
+      }
+      .term .dots { display: flex; gap: 9px; margin-bottom: 30px; }
+      .term .dots i { width: 12px; height: 12px; border-radius: 50%; background: #e6e6e3; display: block; }
+      /* The real transaction hash is 66 characters. Widen and shrink rather
+         than truncate it: the point of the shot is that the hash is real. */
+      .term.wide { width: 1620px; font-size: 25px; }
+
+      /* Typewriter: monospace + steps() so characters land on whole cells. */
+      .type { display: block; white-space: pre; overflow: hidden; width: 0; }
+      .muted { color: #57606a; }
+      .ok { color: #1a7f45; }
+      .gate { color: #b8860b; }
+
+      .cursor {
+        display: inline-block; width: 15px; height: 32px;
+        background: #1f2328; vertical-align: -5px; margin-left: 3px;
+      }
+
+      .statement {
+        max-width: 1500px; text-align: center;
+        font-size: 74px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.26;
+      }
+      .overlay-line {
+        margin-top: 54px; font-size: 44px; font-weight: 500;
+        letter-spacing: -0.01em; color: #1f2328; text-align: center;
+      }
+      .huge {
+        font-size: 128px; font-weight: 600; letter-spacing: -0.035em;
+      }
+      .wordmark {
+        font-family: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace;
+        font-size: 82px; font-weight: 600; letter-spacing: -0.02em;
+      }
+      .tagline { margin-top: 30px; font-size: 42px; font-weight: 400; color: #57606a; }
+      .pair {
+        margin-top: 74px; font-size: 27px; letter-spacing: 0.22em;
+        text-transform: uppercase; color: #57606a;
+      }
+      .rule { width: 92px; height: 3px; background: #b8860b; margin-top: 46px; }
+
+      /* The landing page, captured from the live URL rather than rebuilt here:
+         a redrawn page could drift from what the link actually serves. */
+      .browser {
+        width: 1320px; border-radius: 14px; overflow: hidden;
+        background: #ffffff; border: 1px solid #e6e6e3;
+        box-shadow: 0 18px 48px rgba(31, 35, 40, 0.07);
+      }
+      .browser .bar {
+        display: flex; align-items: center; gap: 9px;
+        padding: 16px 22px; border-bottom: 1px solid #e6e6e3;
+      }
+      .browser .bar i { width: 12px; height: 12px; border-radius: 50%; background: #e6e6e3; display: block; }
+      .browser .url {
+        flex: 1; margin-left: 14px; padding: 8px 18px; border-radius: 8px;
+        background: #f4f4f1; color: #57606a;
+        font-family: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace;
+        font-size: 22px;
+      }
+      /* Cropped to the hero: the fold is where the working terminal sits. */
+      .shot { height: 560px; overflow: hidden; }
+      .shot img { display: block; width: 100%; transform-origin: 50% 0%; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="22.8"
+         data-width="1920" data-height="1080">
+
+      <!-- 1. THE COMMAND -->
+      <div id="s1" class="clip center" data-start="0" data-duration="3.9" data-track-index="0">
+        <div class="term">
+          <div class="dots"><i></i><i></i><i></i></div>
+          <span class="muted">you</span>
+          <span id="s1cmd" class="type">send 0.05 ETH to 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238</span><span id="s1cur" class="cursor"></span>
+        </div>
+        <div id="s1line" class="overlay-line">An agent just decided where your money goes.</div>
+      </div>
+
+      <!-- 2. THE STAKES -->
+      <div id="s2" class="clip center" data-start="3.7" data-duration="4.4" data-track-index="1">
+        <div id="s2text" class="statement">Right 99% of the time is a treasury drained on the hundredth transfer.</div>
+      </div>
+
+      <!-- 3. THE PLAN -- real dry-run output, verbatim -->
+      <div id="s3" class="clip center" data-start="7.9" data-duration="6.0" data-track-index="2">
+        <div class="term">
+          <div class="dots"><i></i><i></i><i></i></div>
+          <span id="p0" class="type">Dry run complete. This is the exact plan that would execute:</span>
+          <span id="p1" class="type">  move         0.001 (native token)</span>
+          <span id="p2" class="type">  to           0x67f10576d6333FFA439EB1d4293BB6C9f019F138</span>
+          <span id="p3" class="type">  chain        11155111</span>
+          <span id="p4" class="type">  gas estimate 21227</span>
+        </div>
+      </div>
+
+      <!-- 4. THE GATE -->
+      <div id="s4" class="clip center" data-start="13.7" data-duration="2.5" data-track-index="3">
+        <div id="s4text" class="huge">Nothing has moved.</div>
+        <div id="s4rule" class="rule"></div>
+      </div>
+
+      <!-- 5. THE APPROVAL -->
+      <div id="s5" class="clip center" data-start="16.0" data-duration="2.7" data-track-index="4">
+        <div class="term wide">
+          <div class="dots"><i></i><i></i><i></i></div>
+          <span class="muted">you</span>
+          <span id="s5cmd" class="type">confirm</span>
+          <span id="s5r1" class="type">transaction  0x5b537ffae10324d3b9e620c5b9647f51f24787b23b293d5097b75c5d3d5a048b</span>
+          <span id="s5r2" class="type ok">receipt      success, verified</span>
+        </div>
+      </div>
+
+      <!-- 5b. THE PAGE -- captured from the live URL -->
+      <div id="s7" class="clip center" data-start="18.2" data-duration="3.0" data-track-index="5">
+        <div class="browser">
+          <div class="bar">
+            <i></i><i></i><i></i>
+            <span class="url">decodededan.github.io/plugin-keeperhub</span>
+          </div>
+          <div class="shot" data-layout-allow-overflow><img id="s7shot" src="assets/images/site.png" alt="plugin-keeperhub landing page" /></div>
+        </div>
+        <div id="s7line" class="overlay-line">The same gate, playable in your browser.</div>
+      </div>
+
+      <!-- 6. THE MARK -->
+      <div id="s6" class="clip center" data-start="21.0" data-duration="1.8" data-track-index="6">
+        <div id="s6a" class="wordmark">plugin-keeperhub</div>
+        <div id="s6b" class="tagline">The agent proposes. You approve.</div>
+        <div id="s6c" class="pair">ElizaOS &times; KeeperHub</div>
+      </div>
+
+      <!-- AUDIO -->
+      <audio id="music" src="assets/audio/music.mp3" data-start="0" data-duration="22.8" data-volume="0.16"></audio>
+      <audio id="sfx-key-1" src="assets/audio/key1.wav" data-start="0.35" data-duration="0.5" data-volume="0.3"></audio>
+      <audio id="sfx-key-2" src="assets/audio/key2.wav" data-start="0.95" data-duration="0.5" data-volume="0.28"></audio>
+      <audio id="sfx-key-3" src="assets/audio/key1.wav" data-start="1.55" data-duration="0.5" data-volume="0.26"></audio>
+      <audio id="sfx-click" src="assets/audio/click.ogg" data-start="16.18" data-duration="0.4" data-volume="0.4"></audio>
+      <audio id="sfx-confirm" src="assets/audio/confirm.ogg" data-start="17.10" data-duration="1.0" data-volume="0.34"></audio>
+    </div>
+
+    <script>
+      /**
+       * Every readable line fades in fast and then HOLDS. The two moments the
+       * film exists for -- the plan block and "Nothing has moved." -- are given
+       * the most still time on screen; everything else yields to them.
+       */
+      const tl = gsap.timeline({ paused: true });
+
+      const typeOn = (sel, chars, at, dur) =>
+        tl.fromTo(sel, { width: 0 }, { width: chars + "ch", duration: dur, ease: "steps(" + chars + ")" }, at);
+
+      // Scene 1 -- the command types, cursor blinks, then the line lands.
+      typeOn("#s1cmd", 59, 0.3, 1.7);
+      tl.to("#s1cur", { opacity: 0, duration: 0.01, repeat: 7, yoyo: true, repeatDelay: 0.38, ease: "none" }, 0.3);
+      tl.fromTo("#s1line", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" }, 2.35);
+      tl.to("#s1", { opacity: 0, duration: 0.5, ease: "power1.inOut" }, 3.4);
+
+      // Scene 2 -- one sentence, still, held long enough to read twice.
+      tl.fromTo("#s2", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power1.out" }, 3.8);
+      tl.fromTo("#s2text", { y: 14 }, { y: 0, duration: 0.8, ease: "power2.out" }, 3.8);
+      tl.to("#s2", { opacity: 0, duration: 0.55, ease: "power1.inOut" }, 7.55);
+
+      // Scene 3 -- the product. Lines land on the beat grid (~0.52s apart),
+      // then the whole block sits still for over two seconds.
+      tl.fromTo("#s3", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 8.0);
+      typeOn("#p0", 60, 8.25, 0.85);
+      typeOn("#p1", 35, 9.30, 0.42);
+      typeOn("#p2", 57, 9.82, 0.48);
+      typeOn("#p3", 23, 10.34, 0.34);
+      typeOn("#p4", 20, 10.86, 0.34);
+      tl.to("#s3", { opacity: 0, duration: 0.5, ease: "power1.inOut" }, 13.4);
+
+      // Scene 4 -- the thesis, alone.
+      tl.fromTo("#s4text", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 13.85);
+      tl.fromTo("#s4rule", { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.5, ease: "power2.out" }, 14.35);
+      tl.to("#s4", { opacity: 0, duration: 0.45, ease: "power1.inOut" }, 15.75);
+
+      // Scene 5 -- approval, then the receipt.
+      tl.fromTo("#s5", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, 16.05);
+      typeOn("#s5cmd", 7, 16.12, 0.28);
+      typeOn("#s5r1", 79, 16.55, 0.45);
+      typeOn("#s5r2", 30, 17.08, 0.28);
+      tl.to("#s5", { opacity: 0, duration: 0.4, ease: "power1.inOut" }, 18.3);
+
+      // Scene 5b -- the page itself, drifting slowly so the capture reads as
+      // a live page rather than a slide. Nothing else moves; the crop holds
+      // the working terminal in frame the whole time.
+      tl.fromTo("#s7", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 18.30);
+      tl.fromTo("#s7shot", { scale: 1 }, { scale: 1.035, duration: 2.55, ease: "none" }, 18.30);
+      tl.fromTo("#s7line", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 18.95);
+      tl.to("#s7", { opacity: 0, duration: 0.45, ease: "power1.inOut" }, 20.75);
+
+      // Scene 6 -- the mark, then silence.
+      tl.fromTo("#s6a", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 21.10);
+      tl.fromTo("#s6b", { opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power1.out" }, 21.40);
+      tl.fromTo("#s6c", { opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power1.out" }, 21.70);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
